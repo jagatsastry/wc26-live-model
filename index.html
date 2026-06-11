@@ -86,7 +86,11 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 .st td.el{color:var(--mut)} .st td .ed{font-size:10.5px;margin-left:4px}
 .st tr:last-child td{border-bottom:0}
 .st td.hot{background:#F4EAD2}
+.st td.lft{text-align:left}
+.st td.half{font-size:11.5px;color:var(--mut);white-space:nowrap}
+.st tr.done td{background:#FBF8EF}
 .stwrap{overflow-x:auto}
+.byline{margin-top:18px;font-size:12px;color:var(--mut);text-align:center;letter-spacing:.06em;text-transform:uppercase}
 /* groups */
 .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
 .gcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
@@ -164,6 +168,11 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
 <div class="ingest" id="ingest"></div>
 
 <section>
+  <h2>Next 5 matches <span class="note">1 · X · 2 = win/draw/win · halves split 45/55 of xG · line locked at kickoff, played rows show actual vs model</span></h2>
+  <div class="stwrap"><table class="st" id="nextm"></table></div>
+</section>
+
+<section>
   <div class="cols">
     <div>
       <h2>Champion probabilities <span class="note">top 16 · Δ vs previous run · <i>open</i> = pre-tournament</span></h2>
@@ -214,6 +223,7 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
     <span>Group tie-breaks on identical points/GD/GF are resolved by lot in-simulation — an approximation of FIFA's full criteria. Knockout results are applied in every simulated bracket where that pairing occurs.</span>
     <span>This is a model, not advice. A 19% favourite loses four times out of five.</span>
   </div>
+  <p class="byline">World cup prediction model by Jagat Pudipeddi</p>
 </footer>
 </div>
 <div id="toast"></div>
@@ -669,7 +679,7 @@ function normTeam(n){ if(!n) return null; const k=String(n).trim();
   return ALIAS[k.toLowerCase()]||ALIAS[low]||null; }
 const E=createEngine(DATA);
 const seedResults=()=>({group:Object.assign({},DATA.fixedResults),ko:[]});
-const S={results:seedResults(),meta:{"Mexico|South Africa":"seed"},opening:null,prev:null,cur:null,an:null,
+const S={results:seedResults(),meta:{"Mexico|South Africa":"seed"},opening:null,prev:null,cur:null,an:null,preds:{},
          opts:{nsim:30000,elo:true},log:[],lastFetch:null,storage:false,busy:false,apiKey:null};
 const $=id=>document.getElementById(id);
 const pf=(p,d=1)=>(p*100).toFixed(d);
@@ -692,13 +702,13 @@ async function loadState(){ S.storage=store.mode();
   const raw=await store.get(SK);
   if(raw){ try{ const v=JSON.parse(raw);
     if(v&&v.v===1){ S.results=v.results||S.results; S.meta=v.meta||S.meta; S.opening=v.opening||null;
-      S.prev=v.prev||null; S.opts=Object.assign(S.opts,v.opts||{}); S.log=v.log||[]; S.lastFetch=v.lastFetch||null; }
+      S.prev=v.prev||null; S.opts=Object.assign(S.opts,v.opts||{}); S.log=v.log||[]; S.lastFetch=v.lastFetch||null; S.preds=v.preds||{}; }
   }catch(e){} }
   const k=await store.get(KK); if(k) S.apiKey=k;
 }
 async function saveState(){ if(!S.storage) return;
   await store.set(SK,JSON.stringify({v:1,results:S.results,meta:S.meta,opening:S.opening,
-    prev:S.prev,opts:S.opts,log:S.log.slice(-12),lastFetch:S.lastFetch})); }
+    prev:S.prev,opts:S.opts,log:S.log.slice(-12),lastFetch:S.lastFetch,preds:S.preds})); }
 
 /* ================= engine runs ================= */
 function setProg(x){const p=$("prog");p.style.display=x==null?"none":"block";if(x!=null)p.querySelector("i").style.width=(x*100).toFixed(1)+"%";}
@@ -850,6 +860,49 @@ function renderBoard(out,prev){
   row.innerHTML=mv.length?mv.map(([t,d])=>`<span class="cell"><span class="cd">${CODES[t]}</span><span class="${d>0?"up":"dn"}">${d>0?"▲":"▼"}${Math.abs(d).toFixed(Math.abs(d)<0.1?2:1)}</span></span>`).join("")
     :`<span class="quiet">No title-odds movement ≥ 0.05pp this refresh.</span>`;
 }
+/* next-5 matches table: analytic odds + per-half scorelines, prediction retained once played */
+const MORD={Jun:6,Jul:7};
+const dkey=d=>{const m=/([A-Za-z]+) (\d+)/.exec(d);return (MORD[m[1]]||6)*100+(+m[2]);};
+function pois(l,k){let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p;}
+function topScores(la,lb,n){
+  const o=[];
+  for(let i=0;i<7;i++)for(let j=0;j<7;j++)o.push([i,j,pois(la,i)*pois(lb,j)]);
+  o.sort((x,y)=>y[2]-x[2]);
+  return o.slice(0,n);
+}
+const fmtScores=s=>s.map(([i,j,p])=>`${i}–${j}&hairsp;<span class="num">${pf(p,0)}%</span>`).join(" · ");
+function renderNext(){
+  const an=S.an.slice().sort((x,y)=>dkey(x.date)-dkey(y.date));
+  const up=an.filter(f=>!f.played).slice(0,5);
+  for(const f of up){ // refresh the pre-match line while still open; frozen automatically once played
+    S.preds[f.key]={date:f.date,a:f.a,b:f.b,W:f.W,D:f.D,L:f.L,xga:f.xga,xgb:f.xgb,
+      ft:topScores(f.xga,f.xgb,2),h1:topScores(f.xga*0.45,f.xgb*0.45,3),h2:topScores(f.xga*0.55,f.xgb*0.55,3)};
+  }
+  const done=an.filter(f=>f.played&&S.preds[f.key]).slice(-5);
+  const head=`<tr><th>Date</th><th>Match</th><th>1 · X · 2</th><th>xG</th><th>FT score</th><th>1st half</th><th>2nd half</th><th>Result vs model</th></tr>`;
+  const row=f=>{
+    const p=S.preds[f.key];
+    let res=`<span class="half">upcoming</span>`;
+    if(f.played){
+      const [ga,gb]=f.result;
+      const o=ga>gb?"W":(ga===gb?"D":"L");
+      const po=o==="W"?p.W:(o==="D"?p.D:p.L);
+      const fav=p.W>=p.D&&p.W>=p.L?"W":(p.D>=p.L?"D":"L");
+      const hit=fav===o;
+      const pex=pois(p.xga,ga)*pois(p.xgb,gb);
+      const [pi,pj]=p.ft[0];
+      const ds=(ga===pi&&gb===pj)?"exact hit":`Δ ${ga-pi>=0?"+":""}${ga-pi}/${gb-pj>=0?"+":""}${gb-pj}`;
+      res=`<b class="num">${ga}–${gb}</b> <span class="dchip ${hit?"up":"dn"}">${hit?"✓":"✗"} call</span><br>`+
+          `<span class="half">outcome had ${pf(po)}% · exact score ${pf(pex)}% · ${ds}</span>`;
+    }
+    return `<tr${f.played?' class="done"':""}><td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td>`+
+      `<td class="num">${pf(p.W)} · ${pf(p.D)} · ${pf(p.L)}</td>`+
+      `<td class="num">${p.xga.toFixed(1)}–${p.xgb.toFixed(1)}</td>`+
+      `<td class="half">${fmtScores(p.ft)}</td><td class="half">${fmtScores(p.h1)}</td><td class="half">${fmtScores(p.h2)}</td>`+
+      `<td>${res}</td></tr>`;
+  };
+  $("nextm").innerHTML=head+done.map(row).join("")+up.map(row).join("");
+}
 function renderLadder(out,prev){
   const open=S.opening?S.opening.champ:{};
   const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]).slice(0,16);
@@ -965,7 +1018,7 @@ function renderKoControls(){
   $("koList").innerHTML=S.results.ko.map((k,i)=>`<span class="tag" style="margin-left:8px">${k.stage} ${CODES[k.a]} ${k.ga}–${k.gb} ${CODES[k.b]} <button class="pencil" data-kodel="${i}">✕</button></span>`).join("");
 }
 function renderAll(out,prev){
-  renderStatus(); renderBoard(out,prev); renderLadder(out,prev); renderFinals(out);
+  renderStatus(); renderBoard(out,prev); renderNext(); renderLadder(out,prev); renderFinals(out);
   renderStages(out); renderGroups(out,prev); renderBracket(out); renderKoControls();
 }
 
@@ -999,7 +1052,7 @@ $("koAdd").addEventListener("click",async()=>{
 });
 $("btnRefresh").addEventListener("click",doRefresh);
 $("btnReset").addEventListener("click",async()=>{
-  S.results=seedResults();S.meta={"Mexico|South Africa":"seed"};S.prev=null;S.log=[];S.lastFetch=null;
+  S.results=seedResults();S.meta={"Mexico|South Africa":"seed"};S.prev=null;S.log=[];S.lastFetch=null;S.preds={};
   await runCurrent(false);toast("Back to opening state.");});
 $("selN").addEventListener("change",async e=>{S.opts.nsim=+e.target.value;S.opening=null;S.prev=null;await runCurrent(false);toast("Re-baselined at "+(S.opts.nsim/1000)+"k sims — movement deltas reset.");});
 $("chkElo").addEventListener("change",async e=>{S.opts.elo=e.target.checked;S.opening=null;S.prev=null;await runCurrent(false);toast("Rating nudge "+(S.opts.elo?"on":"off")+" — re-baselined.");});
