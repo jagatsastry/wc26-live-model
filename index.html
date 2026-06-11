@@ -91,6 +91,8 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 .st .sc{font-weight:700}
 .st .pp{color:var(--mut);font-size:11px;margin-left:4px}
 .st .sep{color:var(--line);padding:0 7px}
+.mhi{color:var(--up);background:#E2F2E7;border-radius:4px;padding:0 3px}
+.mlo{color:var(--dn);background:#F9E6DF;border-radius:4px;padding:0 3px}
 .st td.quiet{text-align:left;color:var(--mut);font-weight:400}
 .stwrap{overflow-x:auto}
 .duo{display:grid;grid-template-columns:1fr;gap:8px}
@@ -178,7 +180,7 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
       <div class="stwrap"><table class="st" id="prevm"></table></div>
     </div>
     <div>
-      <h2>Next 5 matches <span class="note">odds = win/draw/win % · opening = pre-tournament · market = Kalshi/Robinhood <span id="mktWhen"></span></span></h2>
+      <h2>Next 5 matches <span class="note">odds = win/draw/win % · opening = pre-tournament · market = Kalshi/Robinhood <span id="mktWhen"></span> · <span class="mhi">green</span>/<span class="mlo">red</span> = market ≥8pp below/above model on a win side</span></h2>
       <div class="stwrap"><table class="st" id="nextm"></table></div>
     </div>
   </div>
@@ -200,7 +202,7 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
 </section>
 
 <section>
-  <h2>Stage-by-stage <span class="note">top 20 by title odds · Elo = live rating (Δ vs opening)</span></h2>
+  <h2>Stage-by-stage <span class="note">all 48 teams · click a column header to sort · Elo = live rating (Δ vs opening)</span></h2>
   <div class="stwrap"><table class="st" id="stages"></table></div>
 </section>
 
@@ -910,7 +912,16 @@ function backfillPreds(){ // reconstruct exact pre-match lines for played fixtur
 }
 const fmt1x2=p=>{const c=v=>v==null?"—":pf(v,0);
   return `<span class="sc">${c(p.W)}</span><span class="sep">·</span><span class="sc">${c(p.D)}</span><span class="sep">·</span><span class="sc">${c(p.L)}</span>`;};
-const oddsCell=p=>p?`<td class="num">${fmt1x2(p)}</td>`:`<td class="num"><span class="pp">n/a</span></td>`;
+const oddsCell=(p,ref)=>{ // ref = model line; win sides ≥8pp apart get green (model above market) / red (below)
+  if(!p) return `<td class="num"><span class="pp">n/a</span></td>`;
+  if(!ref) return `<td class="num">${fmt1x2(p)}</td>`;
+  const c=(v,r)=>{
+    const s=v==null?"—":pf(v,0);
+    const cls=v!=null&&r!=null&&Math.abs(v-r)>=0.08?(r>v?" mhi":" mlo"):"";
+    return `<span class="sc${cls}">${s}</span>`;
+  };
+  return `<td class="num">${c(p.W,ref.W)}<span class="sep">·</span>${c(p.D,null)}<span class="sep">·</span>${c(p.L,ref.L)}</td>`;
+};
 let anOpenMap=null, MKT=null;
 async function loadMarket(){ // Kalshi blocks browser CORS; tools/edge_finder.mjs writes this same-origin snapshot
   try{const r=await fetch("market.json",{cache:"no-store"});if(r.ok) MKT=await r.json();}catch(e){}
@@ -929,7 +940,7 @@ function renderNext(){
   const done=an.filter(f=>f.played&&S.preds[f.key]).slice(-5).reverse(); // most recent first
   const lead=f=>{const p=S.preds[f.key];
     return `<td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td>`+
-      oddsCell(anOpenMap&&anOpenMap[f.key])+oddsCell(p)+oddsCell(p.mkt);};
+      oddsCell(anOpenMap&&anOpenMap[f.key])+oddsCell(p)+oddsCell(p.mkt,p);};
   $("nextm").innerHTML=
     `<tr><th>Date</th><th>Match</th><th>Model opening</th><th>Model now</th><th>Market</th><th>Exp. goals</th><th>Likely final score</th></tr>`+
     (up.map(f=>{const p=S.preds[f.key];
@@ -977,7 +988,7 @@ function renderStages(out){
   renderStages.last=out;
   const open=S.opening?S.opening.champ:{};
   const base=DATA.ratings, live=out.ratingsLive;
-  const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]);
   top.sort(([a],[b])=>{
     if(stSort.k==="team") return stSort.d*a.localeCompare(b);
     const va=stSort.k==="elo"?live[a]:out.stages[a][stSort.k];
