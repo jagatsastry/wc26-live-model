@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>World Cup 2026 — Live Probability Model</title>
+<style>
+:root{--chalk:#F4F6F1;--card:#FBFCF9;--ink:#16211B;--mut:#5E6B61;--pitch:#0E5232;--pitch2:#16693F;
+--line:#DCE2D8;--wa:#22669F;--dr:#CDD3C8;--wb:#C2632F;--gold:#B98A1F;--gold2:#E4C868;
+--up:#1B7A45;--dn:#B5432A;--board:#0B3D26;--led:#F4D67C}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--chalk);color:var(--ink);font:15px/1.55 ui-sans-serif,system-ui,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.mono,.num{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 70px}
+a{color:var(--pitch)}
+button{font:inherit;cursor:pointer}
+/* ---------- masthead ---------- */
+header.mast{padding:34px 0 18px;border-bottom:3px solid var(--pitch)}
+.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--pitch);font-weight:700}
+h1{font-size:clamp(34px,6vw,60px);line-height:.95;font-weight:800;letter-spacing:-.01em;text-transform:uppercase;margin:8px 0 6px}
+h1 small{display:block;font-size:clamp(14px,2vw,18px);font-weight:600;letter-spacing:.02em;text-transform:none;color:var(--mut);margin-top:8px}
+.topbar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-top:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-size:12px}
+.chip b{color:var(--pitch)}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.controls label{font-size:12px;color:var(--mut);display:flex;gap:6px;align-items:center}
+select{font:inherit;font-size:12.5px;padding:4px 6px;border:1px solid var(--line);border-radius:7px;background:var(--card)}
+.btn{border:0;border-radius:9px;padding:10px 18px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:13px}
+.btn.refresh{background:var(--gold);color:#fff;box-shadow:0 2px 0 #8e6a16}
+.btn.refresh:hover{background:#a87c1a}
+.btn.refresh[disabled]{background:#cbb98a;box-shadow:none;cursor:wait}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--mut);font-weight:600;text-transform:none;letter-spacing:0;padding:6px 12px;font-size:12px}
+.btn.ghost:hover{border-color:var(--pitch);color:var(--pitch)}
+.prog{height:5px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:12px;display:none}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pitch),var(--pitch2));transition:width .15s}
+/* ---------- movers board (signature) ---------- */
+.board{background:var(--board);border-radius:14px;margin:22px 0 8px;padding:14px 18px 16px;color:var(--led);
+box-shadow:inset 0 0 0 1px rgba(244,214,124,.18), 0 10px 24px -18px rgba(11,61,38,.9)}
+.board .bt{font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:rgba(244,214,124,.65);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.board .row{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:16px;letter-spacing:.06em}
+.board .cell{display:flex;gap:7px;align-items:baseline;padding:3px 2px}
+.board .cell .cd{font-weight:700}
+.board .up{color:#9FE3B4}.board .dn{color:#F2A78F}
+.board .quiet{color:rgba(244,214,124,.55);font-size:13px;letter-spacing:.04em;font-family:inherit}
+.ingest{font-size:12px;color:var(--mut);margin:8px 2px 0}
+/* ---------- sections ---------- */
+section{margin-top:34px}
+h2{font-size:13px;letter-spacing:.2em;text-transform:uppercase;color:var(--pitch);border-bottom:2px solid var(--pitch);padding-bottom:7px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+h2 span.note{font-size:11px;letter-spacing:.02em;text-transform:none;color:var(--mut);font-weight:500}
+.cols{display:grid;grid-template-columns:7fr 5fr;gap:26px}
+@media(max-width:920px){.cols{grid-template-columns:1fr}}
+/* ladder */
+.lad{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 14px}
+.lrow{display:grid;grid-template-columns:26px 1fr 120px 76px 92px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px dashed var(--line)}
+.lrow:last-child{border-bottom:0}
+.lrow .rk{color:var(--mut);font-size:12px}
+.lrow .nm b{font-size:14.5px}
+.lrow .nm .cd{color:var(--mut);font-size:11px;margin-left:7px;letter-spacing:.08em}
+.lbar{height:10px;background:#EAEEE7;border-radius:5px;overflow:hidden}
+.lbar i{display:block;height:100%;background:linear-gradient(90deg,var(--pitch),var(--pitch2));border-radius:5px}
+.lv{text-align:right;font-weight:700;font-size:14px}
+.lo{color:var(--mut);font-size:11px;text-align:right}
+.dchip{justify-self:end;font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 7px;min-width:58px;text-align:center}
+.dchip.up{background:#E2F2E7;color:var(--up)}.dchip.dn{background:#F9E6DF;color:var(--dn)}
+.dchip.z{background:transparent;color:var(--mut);font-weight:500}
+@media(prefers-reduced-motion:no-preference){
+ .flash{animation:fl 1.6s ease-out}
+ @keyframes fl{0%{background:#FBF1D4}100%{background:transparent}}
+}
+/* side panel */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.panel h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--pitch);margin-bottom:9px}
+.frow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.frow:last-child{border-bottom:0}
+.panel + .panel{margin-top:16px}
+.panel p{font-size:13px;color:var(--mut)}
+.panel .big{font-size:15px;color:var(--ink)}
+/* stage table */
+table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.st th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--pitch);padding:8px 10px;text-align:right}
+.st th:first-child{text-align:left}
+.st td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right;font-size:13px}
+.st td:first-child{text-align:left;font-weight:600}
+.st td.el{color:var(--mut)} .st td .ed{font-size:10.5px;margin-left:4px}
+.st tr:last-child td{border-bottom:0}
+.st td.hot{background:#F4EAD2}
+.stwrap{overflow-x:auto}
+/* groups */
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
+.gcard{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 14px}
+.gt{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--pitch);font-weight:800;border-bottom:2px solid var(--pitch);padding-bottom:6px;margin-bottom:9px}
+.qrow{display:grid;grid-template-columns:1fr 86px 56px 64px;gap:8px;align-items:center;font-size:12.5px;padding:3px 0}
+.qrow .qb{height:8px;background:#EAEEE7;border-radius:4px;overflow:hidden}
+.qrow .qb i{display:block;height:100%;background:var(--pitch2)}
+.qrow .qv{text-align:right;font-weight:700}
+.qhead{display:grid;grid-template-columns:1fr 86px 56px 64px;gap:8px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:2px}
+.mlist{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:7px}
+.match{font-size:12px}
+.mtop{display:flex;justify-content:space-between;color:var(--mut);font-size:10.5px;margin-bottom:2px}
+.mteams{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.mteams .ta,.mteams .tb{flex:1;font-weight:600;font-size:12.5px}
+.mteams .tb{text-align:right}
+.mbar{display:flex;height:9px;border-radius:5px;overflow:hidden;margin-top:4px;background:#EAEEE7}
+.mbar .sw{background:var(--wa)}.mbar .sd{background:var(--dr)}.mbar .sl{background:var(--wb)}
+.mnum{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mut);margin-top:2px}
+.score{background:var(--pitch);color:#fff;border-radius:6px;padding:1px 8px;font-weight:800;font-size:12px}
+.tag{font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--mut);margin-left:6px}
+.tag.man{border-color:var(--gold);color:var(--gold)}
+.pencil{background:none;border:0;color:var(--mut);font-size:12px;padding:0 3px}
+.pencil:hover{color:var(--pitch)}
+.edit{display:flex;gap:6px;align-items:center;margin-top:5px}
+.edit input{width:46px;font:inherit;font-size:12.5px;padding:3px 5px;border:1px solid var(--line);border-radius:6px;text-align:center}
+.edit .ok{background:var(--pitch);color:#fff;border:0;border-radius:6px;padding:3px 9px;font-size:12px}
+.edit .no{background:none;border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:12px;color:var(--mut)}
+/* bracket */
+.bwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.koform{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin-bottom:10px}
+.koform select,.koform input{font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.koform input{width:44px;text-align:center}
+/* api key row */
+.keyrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:12px;font-size:12px;color:var(--mut)}
+.keyrow input[type=password]{font:inherit;font-size:12.5px;padding:6px 9px;border:1px solid var(--line);border-radius:7px;min-width:250px;background:#fff}
+.keyrow span{max-width:560px;line-height:1.45}
+/* toast */
+#toast{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:50}
+.tmsg{background:var(--ink);color:#fff;border-radius:10px;padding:10px 14px;font-size:13px;max-width:340px;box-shadow:0 8px 24px -10px rgba(0,0,0,.5)}
+.tmsg.err{background:#7C2D1B}
+/* footer */
+footer{margin-top:46px;border-top:1px solid var(--line);padding-top:16px;font-size:12.5px;color:var(--mut)}
+footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--pitch);margin:14px 0 6px}
+.srcs{display:flex;flex-direction:column;gap:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="mast">
+  <div class="eyebrow">FIFA World Cup 26 · United States · Mexico · Canada</div>
+  <h1>Live probability model<small id="subline">Monte Carlo tournament simulator · updates as results come in</small></h1>
+  <div class="topbar">
+    <div class="chips" id="chips"></div>
+    <div class="controls">
+      <label>Sims <select id="selN"><option value="10000">10k</option><option value="30000" selected>30k</option><option value="50000">50k</option><option value="100000">100k</option></select></label>
+      <label><input type="checkbox" id="chkElo" checked> rating nudge</label>
+      <button class="btn ghost" id="btnKey" title="API key for score fetches on the public web">API key</button>
+      <button class="btn ghost" id="btnReset" title="Discard fetched and manual results">Reset to opening</button>
+      <button class="btn refresh" id="btnRefresh">↻ Refresh results</button>
+    </div>
+  </div>
+  <div class="keyrow" id="keyRow" style="display:none">
+    <input type="password" id="apiKey" placeholder="Anthropic API key (sk-ant-…)" autocomplete="off">
+    <label><input type="checkbox" id="keyRemember"> remember on this device</label>
+    <button class="edit ok" id="keyUse" style="margin:0">Use key</button>
+    <span>Only needed when this page runs outside Claude (e.g., GitHub Pages): the key stays in your browser and is sent only to api.anthropic.com to fetch scores. Get one at console.anthropic.com — you can revoke it anytime.</span>
+  </div>
+  <div class="prog" id="prog"><i></i></div>
+</header>
+
+<div class="board" id="board" role="status" aria-live="polite">
+  <div class="bt"><span>Odds movement — since last refresh</span><span id="boardWhen"></span></div>
+  <div class="row" id="boardRow"><span class="quiet">Waiting for first refresh. Movement appears here once new results are simulated in.</span></div>
+</div>
+<div class="ingest" id="ingest"></div>
+
+<section>
+  <div class="cols">
+    <div>
+      <h2>Champion probabilities <span class="note">top 16 · Δ vs previous run · <i>open</i> = pre-tournament</span></h2>
+      <div class="lad" id="ladder"></div>
+    </div>
+    <div>
+      <h2>Most likely finals</h2>
+      <div class="panel"><h3>July 19 · MetLife Stadium</h3><div id="finals"></div></div>
+      <div class="panel"><h3>Model line</h3><p id="verdict" class="big"></p></div>
+      <div class="panel"><h3>Engine</h3><p id="engineLine"></p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Stage-by-stage <span class="note">top 20 by title odds · Elo = live rating (Δ vs opening)</span></h2>
+  <div class="stwrap"><table class="st" id="stages"></table></div>
+</section>
+
+<section>
+  <h2>Groups <span class="note">advance = top two or best-eight third · ✎ enter a result manually</span></h2>
+  <div class="ggrid" id="groups"></div>
+</section>
+
+<section>
+  <h2>Knockout bracket <span class="note">two most likely occupants per slot · gold = actual result</span></h2>
+  <div class="bwrap">
+    <div class="koform" id="koform">
+      <b style="color:var(--ink)">Add knockout result:</b>
+      <select id="koStage"><option>R32</option><option>R16</option><option>QF</option><option>SF</option><option>F</option></select>
+      <select id="koA"></select><input id="koGA" inputmode="numeric" placeholder="0">–<input id="koGB" inputmode="numeric" placeholder="0">
+      <select id="koB"></select>
+      <span id="koWinWrap" style="display:none">pens: <select id="koWin"></select></span>
+      <button class="edit ok" id="koAdd" style="margin:0">Add</button>
+      <span id="koList"></span>
+    </div>
+    <svg id="bracket" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</section>
+
+<footer>
+  <h3>Method</h3>
+  <p id="methodP"></p>
+  <h3>Sources & notes</h3>
+  <div class="srcs">
+    <span>Opening ratings: model Elo-style estimates (June 11, 2026); groups, bracket and Annex C third-place allocation per the official FIFA format; opener Mexico 2–0 South Africa locked as played.</span>
+    <span>“Refresh results” asks Claude (with web search) for final scores only; everything returned is validated against the fixture list before it touches the model. Live or in-progress games are ignored. Inside Claude the fetch is built in; on the public web the page calls the Anthropic API directly with a key you provide, which never leaves your browser. The third-place match is not modelled.</span>
+    <span>Group tie-breaks on identical points/GD/GF are resolved by lot in-simulation — an approximation of FIFA's full criteria. Knockout results are applied in every simulated bracket where that pairing occurs.</span>
+    <span>This is a model, not advice. A 19% favourite loses four times out of five.</span>
+  </div>
+</footer>
+</div>
+<div id="toast"></div>
+
+<script>
+/* WC26 live Monte Carlo engine — port of sim.py with:
+   - counter-based RNG (stable per sim×entity → refresh deltas are causal, not noise)
+   - dynamic result locking (group scores + knockout winners)
+   - optional in-tournament Elo nudge from played results
+   Runs in browser (chunked) and node (test). */
+"use strict";
+
+function createEngine(DATA) {
+  const P = DATA.params;
+  const TEAMS = [];
+  const GLIST = Object.keys(DATA.groups).sort();
+  for (const g of GLIST) for (const t of DATA.groups[g]) TEAMS.push(t);
+  TEAMS.sort();
+  const TI = new Map(TEAMS.map((t, i) => [t, i]));
+  const NT = TEAMS.length;
+
+  // ---------- counter-based RNG ----------
+  function mix(a) {
+    a |= 0; a = (a ^ (a >>> 16)) | 0; a = Math.imul(a, 0x21f0aaad);
+    a = (a ^ (a >>> 15)) | 0; a = Math.imul(a, 0x735a2d97);
+    a = (a ^ (a >>> 15)) | 0; return a >>> 0;
+  }
+  function streamSeed(seed, sim, kind, id) {
+    let h = mix((seed >>> 0) ^ Math.imul(sim + 1, 0x85ebca6b));
+    h = mix(h ^ Math.imul(kind, 0xc2b2ae35));
+    h = mix(h ^ Math.imul(id + 1, 0x27d4eb2f));
+    return h >>> 0;
+  }
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6d2b79f5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  // ---------- math ----------
+  const FACT = [1]; for (let k = 1; k <= 13; k++) FACT[k] = FACT[k - 1] * k;
+  function wdl(la, lb) {
+    const pa = [], pb = [];
+    for (let k = 0; k < 13; k++) { pa[k] = Math.exp(-la) * Math.pow(la, k) / FACT[k]; pb[k] = Math.exp(-lb) * Math.pow(lb, k) / FACT[k]; }
+    let W = 0, D = 0, L = 0;
+    for (let i = 0; i < 13; i++) for (let j = 0; j < 13; j++) {
+      const p = pa[i] * pb[j];
+      if (i > j) W += p; else if (i === j) D += p; else L += p;
+    }
+    const s = W + D + L; return [W / s, D / s, L / s];
+  }
+  // calibrate C exactly like sim.py grid
+  let C = 0.87;
+  (function calibrate() {
+    let best = [1e9, 0.8];
+    for (let c = 0.60; c < 1.10; c += 0.01) {
+      let err = 0;
+      for (let d = 0; d <= 800; d += 80) {
+        const la = Math.min(Math.max(P.MU / 2 * Math.exp(c * d / 400), 0.15), 4.6);
+        const lb = Math.min(Math.max(P.MU / 2 * Math.exp(-c * d / 400), 0.15), 4.6);
+        const [W, D] = wdl(la, lb);
+        const t = 1 / (1 + Math.pow(10, -d / 400));
+        err += Math.pow(W + 0.5 * D - t, 2);
+      }
+      if (err < best[0]) best = [err, c];
+    }
+    C = Math.round(best[1] * 100) / 100;
+  })();
+  function lams(d) {
+    return [Math.min(Math.max(P.MU / 2 * Math.exp(C * d / 400), 0.15), 4.6),
+            Math.min(Math.max(P.MU / 2 * Math.exp(-C * d / 400), 0.15), 4.6)];
+  }
+  // Acklam inverse normal CDF
+  function invNorm(p) {
+    const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+    const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+    const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+    const dd = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+    const pl = 0.02425;
+    let q, r;
+    if (p < pl) { q = Math.sqrt(-2 * Math.log(p)); return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((dd[0] * q + dd[1]) * q + dd[2]) * q + dd[3]) * q + 1); }
+    if (p <= 1 - pl) { q = p - 0.5; r = q * q; return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q / (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1); }
+    q = Math.sqrt(-2 * Math.log(1 - p)); return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) / ((((dd[0] * q + dd[1]) * q + dd[2]) * q + dd[3]) * q + 1);
+  }
+  function poisson(lam, rand) {
+    const L = Math.exp(-lam); let k = 0, p = 1;
+    do { k++; p *= rand(); } while (p > L);
+    return k - 1;
+  }
+
+  // ---------- Annex C: precompute all 495 combos (same backtracking as sim.py) ----------
+  const SLOTS = DATA.slotOrder;
+  const ALLOWED = {}; for (const s of SLOTS) ALLOWED[s] = new Set(DATA.slots[s]);
+  const COMBO = new Map();
+  (function build() {
+    const letters = "ABCDEFGHIJKL".split("");
+    const combo = [];
+    function choose(start, k) {
+      if (combo.length === k) {
+        const sorted = combo.slice().sort();
+        const assign = {};
+        const used = new Set();
+        function bt(si) {
+          if (si === SLOTS.length) return true;
+          const s = SLOTS[si];
+          for (const g of sorted) {
+            if (!used.has(g) && ALLOWED[s].has(g)) {
+              assign[s] = g; used.add(g);
+              if (bt(si + 1)) return true;
+              used.delete(g); delete assign[s];
+            }
+          }
+          return false;
+        }
+        if (!bt(0)) throw new Error("no Annex C assignment for " + sorted.join(""));
+        COMBO.set(sorted.join(""), SLOTS.map(s => assign[s]));
+        return;
+      }
+      for (let i = start; i < letters.length; i++) { combo.push(letters[i]); choose(i + 1, k); combo.pop(); }
+    }
+    choose(0, 8);
+  })();
+
+  // ---------- state ----------
+  let rawR = Object.assign({}, DATA.ratings);   // raw Elo-style, possibly Elo-nudged
+  let cR = null;                                 // compressed
+  let results = { group: {}, ko: [] };           // group: "A|B" (canonical fixture key) -> [ga,gb]; ko: [{stage,a,b,ga,gb,w}]
+  let opts = { nsim: 30000, seed: P.SEED, eloUpdate: true, kElo: 40 };
+
+  const FIX = DATA.fixtures.map((f, i) => ({ ...f, idx: i, key: f.a + "|" + f.b }));
+  const GIDX = GLIST.map(g => DATA.groups[g].map(t => TI.get(t)));
+  const HOSTC = DATA.host;
+  function gbonus(t) { return HOSTC[t] ? P.HOME_GROUP : 0; }
+
+  function recompress() { cR = {}; for (const t of TEAMS) cR[t] = 1800 + P.KAPPA * (rawR[t] - 1800); }
+
+  function dateKey(d) { const m = /([A-Za-z]+) (\d+)/.exec(d); const mo = { Jun: 6, Jul: 7 }[m[1]] || 6; return mo * 100 + (+m[2]); }
+
+  // model expectancy (W + D/2) for a pairing at diff d, integrating form noise like the analytic display
+  function expectancy(d0) {
+    const sd = Math.SQRT2 * P.NOISE_T;
+    let E = 0;
+    for (let i = 0; i < 13; i++) {
+      const q = 0.04 + i * (0.92 / 12);
+      const d = d0 + invNorm(q) * sd;
+      const [la, lb] = lams(d);
+      const [W, D] = wdl(la, lb);
+      E += (W + 0.5 * D) / 13;
+    }
+    return E;
+  }
+
+  // apply Elo nudges from played results, in chronological order; returns live raw ratings
+  function applyElo() {
+    rawR = Object.assign({}, DATA.ratings);
+    recompress();
+    if (!opts.eloUpdate) return;
+    const played = FIX.filter(f => results.group[f.key])
+      .map(f => ({ ...f, ga: results.group[f.key][0], gb: results.group[f.key][1], stageOrd: 0 }))
+      .sort((x, y) => dateKey(x.date) - dateKey(y.date) || x.idx - y.idx);
+    const koOrd = { R32: 1, R16: 2, QF: 3, SF: 4, F: 5 };
+    const koPlayed = results.ko.slice().sort((x, y) => (koOrd[x.stage] || 9) - (koOrd[y.stage] || 9));
+    const seq = played.concat(koPlayed.map(k => ({ a: k.a, b: k.b, ga: k.ga, gb: k.gb, w: k.w, ko: true, stage: k.stage })));
+    for (const m of seq) {
+      const ba = m.ko ? 0 : gbonus(m.a), bb = m.ko ? 0 : gbonus(m.b); // KO venue bonus omitted in nudge (venue varies); small effect
+      const d0 = (cR[m.a] + ba) - (cR[m.b] + bb);
+      const E = expectancy(d0);
+      let S;
+      if (m.ko) S = (m.w === m.a) ? 1 : 0;
+      else S = m.ga > m.gb ? 1 : (m.ga === m.gb ? 0.5 : 0);
+      const margin = Math.abs((m.ga ?? 0) - (m.gb ?? 0));
+      const G = margin <= 1 ? 1 : (margin === 2 ? 1.5 : (11 + margin) / 8);
+      const delta = opts.kElo * G * (S - E);
+      rawR[m.a] += delta; rawR[m.b] -= delta;
+      recompress();
+    }
+  }
+
+  // ---------- analytic per-fixture W/D/L for display ----------
+  function computeAnalytic() {
+    const out = [];
+    const sd = Math.SQRT2 * P.NOISE_T;
+    for (const f of FIX) {
+      const res = results.group[f.key];
+      const d0 = (cR[f.a] + gbonus(f.a)) - (cR[f.b] + gbonus(f.b));
+      let W = 0, D = 0, L = 0;
+      for (let i = 0; i < 13; i++) {
+        const q = 0.04 + i * (0.92 / 12);
+        const d = d0 + invNorm(q) * sd;
+        const [la, lb] = lams(d);
+        const r = wdl(la, lb);
+        W += r[0] / 13; D += r[1] / 13; L += r[2] / 13;
+      }
+      const [la, lb] = lams(d0);
+      let bs = [0, 0], bp = 0;
+      for (let i = 0; i < 7; i++) for (let j = 0; j < 7; j++) {
+        const p = Math.exp(-la) * Math.pow(la, i) / FACT[i] * Math.exp(-lb) * Math.pow(lb, j) / FACT[j];
+        if (p > bp) { bp = p; bs = [i, j]; }
+      }
+      out.push({ g: f.g, a: f.a, b: f.b, date: f.date, key: f.key, W, D, L, xga: la, xgb: lb, score: bs, played: !!res, result: res || null });
+    }
+    return out;
+  }
+
+  // ---------- the simulation ----------
+  function run(onProgress) {
+    applyElo();
+    const NS = opts.nsim, seed = opts.seed;
+    // precompute fixture arrays
+    const nF = FIX.length;
+    const fia = new Int32Array(nF), fib = new Int32Array(nF), fd0 = new Float64Array(nF);
+    const fpl = new Uint8Array(nF), fga = new Int32Array(nF), fgb = new Int32Array(nF);
+    FIX.forEach((f, i) => {
+      fia[i] = TI.get(f.a); fib[i] = TI.get(f.b);
+      fd0[i] = (cR[f.a] + gbonus(f.a)) - (cR[f.b] + gbonus(f.b));
+      const r = results.group[f.key];
+      if (r) { fpl[i] = 1; fga[i] = r[0]; fgb[i] = r[1]; }
+    });
+    const cRArr = new Float64Array(NT); TEAMS.forEach((t, i) => cRArr[i] = cR[t]);
+    const hostArr = TEAMS.map(t => HOSTC[t] || null);
+    // KO forcing map: "i|j" (i<j team idx) -> winner idx
+    const koForce = new Map();
+    for (const k of results.ko) {
+      const ia = TI.get(k.a), ib = TI.get(k.b), iw = TI.get(k.w);
+      if (ia == null || ib == null || iw == null) continue;
+      koForce.set(Math.min(ia, ib) + "|" + Math.max(ia, ib), iw);
+    }
+    const koForceHits = new Map(); // nodeM -> Map(pairKey->count)
+
+    // counters
+    const champ = new Int32Array(NT);
+    const STG = ["R32", "R16", "QF", "SF", "F", "W"];
+    const stage = STG.map(() => new Int32Array(NT));
+    const p1 = new Int32Array(NT), p2 = new Int32Array(NT), p3 = new Int32Array(NT), p3a = new Int32Array(NT);
+    const xpts = new Float64Array(NT);
+    const NODES = []; for (let m = 73; m <= 102; m++) NODES.push(m); NODES.push(104);
+    const nodeIdx = new Map(NODES.map((m, i) => [m, i]));
+    const nodeOcc = new Int32Array(NODES.length * NT);
+    const finalPairs = new Map();
+
+    const r16def = DATA.r16def, qfdef = DATA.qfdef, sfdef = DATA.sfdef, r32def = DATA.r32def;
+    const VEN = DATA.venue;
+    const koCache = new Map();
+    function koP(ia, ib, venue, formA, formB) {
+      const ba = hostArr[ia] === venue ? P.HOME_KO : 0;
+      const bb = hostArr[ib] === venue ? P.HOME_KO : 0;
+      let d = (cRArr[ia] + ba) - (cRArr[ib] + bb) + formA - formB;
+      d = Math.round(d / 8) * 8;
+      let p = koCache.get(d);
+      if (p === undefined) {
+        const [la, lb] = lams(d);
+        const [W, D] = wdl(la, lb);
+        const [We, De] = wdl(la / 3, lb / 3);
+        const pen = 0.5 + Math.max(Math.min(d, 600), -600) / 4000;
+        p = W + D * (We + De * pen);
+        koCache.set(d, p);
+      }
+      return p;
+    }
+
+    const pts = new Int32Array(NT), gd = new Int32Array(NT), gf = new Int32Array(NT);
+    const form = new Float64Array(NT);
+    const keyv = new Float64Array(NT);
+    const winnerG = new Int32Array(12), runnerG = new Int32Array(12), thirdG = new Int32Array(12);
+    const thirdKey = new Float64Array(12);
+    const Wn = new Int32Array(105);
+
+    function simOne(s) {
+      // per-sim form (one normal per team, Box-Muller, own stream)
+      for (let t = 0; t < NT; t++) {
+        const rnd = mulberry32(streamSeed(seed, s, 1, t));
+        const u1 = rnd() + 1e-12, u2 = rnd();
+        form[t] = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * P.NOISE_T;
+      }
+      pts.fill(0); gd.fill(0); gf.fill(0);
+      for (let i = 0; i < nF; i++) {
+        let ga, gb;
+        if (fpl[i]) { ga = fga[i]; gb = fgb[i]; }
+        else {
+          const ds = fd0[i] + form[fia[i]] - form[fib[i]];
+          const la = Math.min(Math.max(P.MU / 2 * Math.exp(C * ds / 400), 0.15), 4.6);
+          const lb = Math.min(Math.max(P.MU / 2 * Math.exp(-C * ds / 400), 0.15), 4.6);
+          const rnd = mulberry32(streamSeed(seed, s, 2, i));
+          ga = poisson(la, rnd); gb = poisson(lb, rnd);
+        }
+        const ia = fia[i], ib = fib[i];
+        if (ga > gb) pts[ia] += 3; else if (ga === gb) { pts[ia] += 1; pts[ib] += 1; } else pts[ib] += 3;
+        gd[ia] += ga - gb; gd[ib] += gb - ga; gf[ia] += ga; gf[ib] += gb;
+      }
+      // keys + group order
+      for (let t = 0; t < NT; t++) {
+        const rnd = mulberry32(streamSeed(seed, s, 3, t));
+        keyv[t] = pts[t] * 1e6 + (gd[t] + 200) * 1e3 + gf[t] + rnd() * 0.999;
+        xpts[t] += pts[t];
+      }
+      for (let gi = 0; gi < 12; gi++) {
+        const idx = GIDX[gi];
+        // insertion sort 4 by key desc
+        const ord = [idx[0], idx[1], idx[2], idx[3]];
+        for (let i = 1; i < 4; i++) { const v = ord[i]; let j = i - 1; while (j >= 0 && keyv[ord[j]] < keyv[v]) { ord[j + 1] = ord[j]; j--; } ord[j + 1] = v; }
+        winnerG[gi] = ord[0]; runnerG[gi] = ord[1]; thirdG[gi] = ord[2];
+        thirdKey[gi] = keyv[ord[2]];
+        p1[ord[0]]++; p2[ord[1]]++; p3[ord[2]]++;
+      }
+      // top-8 thirds by key
+      const tOrd = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+      for (let i = 1; i < 12; i++) { const v = tOrd[i]; let j = i - 1; while (j >= 0 && thirdKey[tOrd[j]] < thirdKey[v]) { tOrd[j + 1] = tOrd[j]; j--; } tOrd[j + 1] = v; }
+      const advG = tOrd.slice(0, 8);
+      for (const gi of advG) p3a[thirdG[gi]]++;
+      const comboKey = advG.map(gi => GLIST[gi]).sort().join("");
+      const assign = COMBO.get(comboKey); // array aligned to SLOTS order
+      const Th = {}; SLOTS.forEach((sl, i) => { Th[sl] = thirdG[GLIST.indexOf(assign[i])]; });
+
+      const Wg = {}, Rg = {};
+      for (let gi = 0; gi < 12; gi++) { Wg[GLIST[gi]] = winnerG[gi]; Rg[GLIST[gi]] = runnerG[gi]; }
+      for (let gi = 0; gi < 12; gi++) { stage[0][winnerG[gi]]++; stage[0][runnerG[gi]]++; }
+      for (const gi of advG) stage[0][thirdG[gi]]++;
+
+      function slotTeam(code) {
+        if (code[0] === "T") return Th[code.slice(1)];
+        const pos = code[0], g = code[1];
+        return pos === "1" ? Wg[g] : Rg[g];
+      }
+      // R32
+      for (let m = 73; m <= 88; m++) {
+        const def = r32def[String(m)];
+        const a = slotTeam(def[0]), b = slotTeam(def[1]);
+        const ni = nodeIdx.get(m);
+        nodeOcc[ni * NT + a]++; nodeOcc[ni * NT + b]++;
+        const fk = Math.min(a, b) + "|" + Math.max(a, b);
+        let w;
+        if (koForce.has(fk)) {
+          w = koForce.get(fk);
+          let h = koForceHits.get(m); if (!h) { h = new Map(); koForceHits.set(m, h); }
+          h.set(fk, (h.get(fk) || 0) + 1);
+        } else {
+          const p = koP(a, b, VEN[String(m)], form[a], form[b]);
+          const u = mulberry32(streamSeed(seed, s, 4, m))();
+          w = u < p ? a : b;
+        }
+        Wn[m] = w; stage[1][w]++;
+      }
+      // R16, QF, SF, F
+      const rounds = [[r16def, 2], [qfdef, 3], [sfdef, 4]];
+      for (const [def, sIdx] of rounds) {
+        for (const mS of Object.keys(def)) {
+          const m = +mS;
+          const a = Wn[def[mS][0]], b = Wn[def[mS][1]];
+          const ni = nodeIdx.get(m);
+          nodeOcc[ni * NT + a]++; nodeOcc[ni * NT + b]++;
+          const fk = Math.min(a, b) + "|" + Math.max(a, b);
+          let w;
+          if (koForce.has(fk)) {
+            w = koForce.get(fk);
+            let h = koForceHits.get(m); if (!h) { h = new Map(); koForceHits.set(m, h); }
+            h.set(fk, (h.get(fk) || 0) + 1);
+          } else {
+            const p = koP(a, b, VEN[String(m)], form[a], form[b]);
+            const u = mulberry32(streamSeed(seed, s, 4, m))();
+            w = u < p ? a : b;
+          }
+          Wn[m] = w; stage[sIdx][w]++;
+        }
+      }
+      const fa = Wn[101], fb = Wn[102];
+      const ni = nodeIdx.get(104);
+      nodeOcc[ni * NT + fa]++; nodeOcc[ni * NT + fb]++;
+      finalPairs.set(fa * NT + fb, (finalPairs.get(fa * NT + fb) || 0) + 1);
+      const fkF = Math.min(fa, fb) + "|" + Math.max(fa, fb);
+      let cWin;
+      if (koForce.has(fkF)) {
+        cWin = koForce.get(fkF);
+        let h = koForceHits.get(104); if (!h) { h = new Map(); koForceHits.set(104, h); }
+        h.set(fkF, (h.get(fkF) || 0) + 1);
+      } else {
+        const p = koP(fa, fb, "US", form[fa], form[fb]);
+        const u = mulberry32(streamSeed(seed, s, 4, 104))();
+        cWin = u < p ? fa : fb;
+      }
+      stage[5][cWin]++; champ[cWin]++;
+    }
+
+    return new Promise((resolve) => {
+      const CH = 1500;
+      let s = 0;
+      function chunk() {
+        const end = Math.min(s + CH, NS);
+        for (; s < end; s++) simOne(s);
+        if (onProgress) onProgress(s / NS);
+        if (s < NS) setTimeout(chunk, 0);
+        else {
+          // aggregate
+          const out = { nsim: NS, teams: TEAMS, champ: {}, stages: {}, group: {}, nodes: {}, finals: [], ratingsLive: Object.assign({}, rawR), C };
+          for (const t of TEAMS) {
+            const i = TI.get(t);
+            out.champ[t] = champ[i] / NS;
+            out.stages[t] = { R32: stage[0][i] / NS, R16: stage[1][i] / NS, QF: stage[2][i] / NS, SF: stage[3][i] / NS, F: stage[4][i] / NS, W: stage[5][i] / NS };
+            out.group[t] = { p1: p1[i] / NS, p2: p2[i] / NS, p3: p3[i] / NS, p3adv: p3a[i] / NS, adv: (p1[i] + p2[i] + p3a[i]) / NS, xpts: xpts[i] / NS };
+          }
+          for (const m of NODES) {
+            const ni = nodeIdx.get(m);
+            const arr = [];
+            for (let t = 0; t < NT; t++) if (nodeOcc[ni * NT + t] > 0) arr.push([TEAMS[t], nodeOcc[ni * NT + t] / NS]);
+            arr.sort((x, y) => y[1] - x[1]);
+            out.nodes[m] = arr.slice(0, 4);
+          }
+          const fp = [...finalPairs.entries()].sort((x, y) => y[1] - x[1]).slice(0, 8);
+          out.finals = fp.map(([k, c]) => [TEAMS[Math.floor(k / NT)], TEAMS[k % NT], c / NS]);
+          out.koApplied = {};
+          for (const [m, h] of koForceHits) {
+            const top = [...h.entries()].sort((x, y) => y[1] - x[1])[0];
+            const [ia, ib] = top[0].split("|").map(Number);
+            out.koApplied[m] = { a: TEAMS[ia], b: TEAMS[ib], share: top[1] / NS };
+          }
+          resolve(out);
+        }
+      }
+      chunk();
+    });
+  }
+
+  return {
+    teams: TEAMS,
+    setResults(r) { results = { group: Object.assign({}, r.group || {}), ko: (r.ko || []).slice() }; },
+    getResults() { return results; },
+    setOptions(o) { Object.assign(opts, o); },
+    getOptions() { return Object.assign({}, opts); },
+    computeAnalytic() { applyElo(); return computeAnalytic(); },
+    liveRatings() { applyElo(); return Object.assign({}, rawR); },
+    run,
+    fixtures: FIX,
+  };
+}
+
+if (typeof module !== "undefined") module.exports = { createEngine };
+
+</script>
+<script>
+const DATA = {"ratings": {"Spain": 2185, "Argentina": 2145, "France": 2065, "England": 2030, "Brazil": 2020, "Portugal": 2005, "Netherlands": 1975, "Germany": 1945, "Colombia": 1935, "Uruguay": 1895, "Croatia": 1885, "Morocco": 1875, "Ecuador": 1870, "Belgium": 1865, "Japan": 1855, "Norway": 1855, "Mexico": 1810, "Switzerland": 1795, "Austria": 1790, "United States": 1785, "Canada": 1770, "Senegal": 1765, "Türkiye": 1760, "Paraguay": 1745, "Iran": 1745, "South Korea": 1735, "Ivory Coast": 1730, "Czechia": 1725, "Scotland": 1725, "Egypt": 1715, "Australia": 1705, "Algeria": 1700, "Sweden": 1700, "Tunisia": 1685, "Bosnia and Herzegovina": 1665, "Panama": 1655, "Uzbekistan": 1650, "DR Congo": 1645, "Saudi Arabia": 1630, "Ghana": 1630, "South Africa": 1625, "Qatar": 1615, "Iraq": 1605, "Jordan": 1605, "New Zealand": 1590, "Cape Verde": 1575, "Curaçao": 1550, "Haiti": 1510}, "groups": {"A": ["Mexico", "South Africa", "South Korea", "Czechia"], "B": ["Canada", "Bosnia and Herzegovina", "Qatar", "Switzerland"], "C": ["Brazil", "Morocco", "Haiti", "Scotland"], "D": ["United States", "Paraguay", "Australia", "Türkiye"], "E": ["Germany", "Curaçao", "Ivory Coast", "Ecuador"], "F": ["Netherlands", "Japan", "Sweden", "Tunisia"], "G": ["Belgium", "Egypt", "Iran", "New Zealand"], "H": ["Spain", "Cape Verde", "Saudi Arabia", "Uruguay"], "I": ["France", "Senegal", "Iraq", "Norway"], "J": ["Argentina", "Algeria", "Austria", "Jordan"], "K": ["Portugal", "DR Congo", "Uzbekistan", "Colombia"], "L": ["England", "Croatia", "Ghana", "Panama"]}, "fixtures": [{"g": "A", "a": "Mexico", "b": "South Africa", "date": "Jun 11"}, {"g": "A", "a": "South Korea", "b": "Czechia", "date": "Jun 11"}, {"g": "A", "a": "Mexico", "b": "South Korea", "date": "Jun 18"}, {"g": "A", "a": "Czechia", "b": "South Africa", "date": "Jun 18"}, {"g": "A", "a": "Czechia", "b": "Mexico", "date": "Jun 24"}, {"g": "A", "a": "South Africa", "b": "South Korea", "date": "Jun 24"}, {"g": "B", "a": "Canada", "b": "Bosnia and Herzegovina", "date": "Jun 12"}, {"g": "B", "a": "Qatar", "b": "Switzerland", "date": "Jun 13"}, {"g": "B", "a": "Canada", "b": "Qatar", "date": "Jun 18"}, {"g": "B", "a": "Switzerland", "b": "Bosnia and Herzegovina", "date": "Jun 18"}, {"g": "B", "a": "Switzerland", "b": "Canada", "date": "Jun 24"}, {"g": "B", "a": "Bosnia and Herzegovina", "b": "Qatar", "date": "Jun 24"}, {"g": "C", "a": "Brazil", "b": "Morocco", "date": "Jun 13"}, {"g": "C", "a": "Haiti", "b": "Scotland", "date": "Jun 13"}, {"g": "C", "a": "Brazil", "b": "Haiti", "date": "Jun 19"}, {"g": "C", "a": "Scotland", "b": "Morocco", "date": "Jun 19"}, {"g": "C", "a": "Scotland", "b": "Brazil", "date": "Jun 24"}, {"g": "C", "a": "Morocco", "b": "Haiti", "date": "Jun 24"}, {"g": "D", "a": "United States", "b": "Paraguay", "date": "Jun 12"}, {"g": "D", "a": "Australia", "b": "Türkiye", "date": "Jun 13"}, {"g": "D", "a": "United States", "b": "Australia", "date": "Jun 19"}, {"g": "D", "a": "Türkiye", "b": "Paraguay", "date": "Jun 19"}, {"g": "D", "a": "Türkiye", "b": "United States", "date": "Jun 25"}, {"g": "D", "a": "Paraguay", "b": "Australia", "date": "Jun 25"}, {"g": "E", "a": "Germany", "b": "Curaçao", "date": "Jun 14"}, {"g": "E", "a": "Ivory Coast", "b": "Ecuador", "date": "Jun 14"}, {"g": "E", "a": "Germany", "b": "Ivory Coast", "date": "Jun 20"}, {"g": "E", "a": "Ecuador", "b": "Curaçao", "date": "Jun 20"}, {"g": "E", "a": "Ecuador", "b": "Germany", "date": "Jun 25"}, {"g": "E", "a": "Curaçao", "b": "Ivory Coast", "date": "Jun 25"}, {"g": "F", "a": "Netherlands", "b": "Japan", "date": "Jun 14"}, {"g": "F", "a": "Sweden", "b": "Tunisia", "date": "Jun 14"}, {"g": "F", "a": "Netherlands", "b": "Sweden", "date": "Jun 20"}, {"g": "F", "a": "Tunisia", "b": "Japan", "date": "Jun 20"}, {"g": "F", "a": "Tunisia", "b": "Netherlands", "date": "Jun 25"}, {"g": "F", "a": "Japan", "b": "Sweden", "date": "Jun 25"}, {"g": "G", "a": "Belgium", "b": "Egypt", "date": "Jun 15"}, {"g": "G", "a": "Iran", "b": "New Zealand", "date": "Jun 15"}, {"g": "G", "a": "Belgium", "b": "Iran", "date": "Jun 21"}, {"g": "G", "a": "New Zealand", "b": "Egypt", "date": "Jun 21"}, {"g": "G", "a": "New Zealand", "b": "Belgium", "date": "Jun 26"}, {"g": "G", "a": "Egypt", "b": "Iran", "date": "Jun 26"}, {"g": "H", "a": "Spain", "b": "Cape Verde", "date": "Jun 15"}, {"g": "H", "a": "Saudi Arabia", "b": "Uruguay", "date": "Jun 15"}, {"g": "H", "a": "Spain", "b": "Saudi Arabia", "date": "Jun 21"}, {"g": "H", "a": "Uruguay", "b": "Cape Verde", "date": "Jun 21"}, {"g": "H", "a": "Uruguay", "b": "Spain", "date": "Jun 26"}, {"g": "H", "a": "Cape Verde", "b": "Saudi Arabia", "date": "Jun 26"}, {"g": "I", "a": "France", "b": "Senegal", "date": "Jun 16"}, {"g": "I", "a": "Iraq", "b": "Norway", "date": "Jun 16"}, {"g": "I", "a": "France", "b": "Iraq", "date": "Jun 22"}, {"g": "I", "a": "Norway", "b": "Senegal", "date": "Jun 22"}, {"g": "I", "a": "Norway", "b": "France", "date": "Jun 26"}, {"g": "I", "a": "Senegal", "b": "Iraq", "date": "Jun 26"}, {"g": "J", "a": "Argentina", "b": "Algeria", "date": "Jun 16"}, {"g": "J", "a": "Austria", "b": "Jordan", "date": "Jun 16"}, {"g": "J", "a": "Argentina", "b": "Austria", "date": "Jun 22"}, {"g": "J", "a": "Jordan", "b": "Algeria", "date": "Jun 22"}, {"g": "J", "a": "Jordan", "b": "Argentina", "date": "Jun 27"}, {"g": "J", "a": "Algeria", "b": "Austria", "date": "Jun 27"}, {"g": "K", "a": "Portugal", "b": "DR Congo", "date": "Jun 17"}, {"g": "K", "a": "Uzbekistan", "b": "Colombia", "date": "Jun 17"}, {"g": "K", "a": "Portugal", "b": "Uzbekistan", "date": "Jun 23"}, {"g": "K", "a": "Colombia", "b": "DR Congo", "date": "Jun 23"}, {"g": "K", "a": "Colombia", "b": "Portugal", "date": "Jun 27"}, {"g": "K", "a": "DR Congo", "b": "Uzbekistan", "date": "Jun 27"}, {"g": "L", "a": "England", "b": "Croatia", "date": "Jun 17"}, {"g": "L", "a": "Ghana", "b": "Panama", "date": "Jun 17"}, {"g": "L", "a": "England", "b": "Ghana", "date": "Jun 23"}, {"g": "L", "a": "Panama", "b": "Croatia", "date": "Jun 23"}, {"g": "L", "a": "Panama", "b": "England", "date": "Jun 27"}, {"g": "L", "a": "Croatia", "b": "Ghana", "date": "Jun 27"}], "host": {"Mexico": "MX", "United States": "US", "Canada": "CA"}, "venue": {"73": "US", "74": "US", "75": "MX", "76": "US", "77": "US", "78": "US", "79": "MX", "80": "US", "81": "US", "82": "US", "83": "CA", "84": "US", "85": "CA", "86": "US", "87": "US", "88": "US", "89": "US", "90": "US", "91": "US", "92": "MX", "93": "US", "94": "US", "95": "US", "96": "CA", "97": "US", "98": "US", "99": "US", "100": "US", "101": "US", "102": "US", "104": "US"}, "slots": {"1E": "ABCDF", "1I": "CDFGH", "1A": "CEFHI", "1L": "EHIJK", "1D": "BEFIJ", "1G": "AEHIJ", "1B": "EFGIJ", "1K": "DEIJL"}, "slotOrder": ["1E", "1I", "1A", "1L", "1D", "1G", "1B", "1K"], "r32def": {"73": ["2A", "2B"], "74": ["1E", "T1E"], "75": ["1F", "2C"], "76": ["1C", "2F"], "77": ["1I", "T1I"], "78": ["2E", "2I"], "79": ["1A", "T1A"], "80": ["1L", "T1L"], "81": ["1D", "T1D"], "82": ["1G", "T1G"], "83": ["2K", "2L"], "84": ["1H", "2J"], "85": ["1B", "T1B"], "86": ["1J", "2H"], "87": ["1K", "T1K"], "88": ["2D", "2G"]}, "r16def": {"89": [74, 77], "90": [73, 75], "91": [76, 78], "92": [79, 80], "93": [83, 84], "94": [81, 82], "95": [86, 88], "96": [85, 87]}, "qfdef": {"97": [89, 90], "98": [93, 94], "99": [91, 92], "100": [95, 96]}, "sfdef": {"101": [97, 98], "102": [99, 100]}, "colOrder": {"r32": [74, 77, 73, 75, 83, 84, 81, 82, 76, 78, 79, 80, 86, 88, 85, 87], "r16": [89, 90, 93, 94, 91, 92, 95, 96], "qf": [97, 98, 99, 100], "sf": [101, 102]}, "koDates": {"73": "Jun 29", "74": "Jun 29", "75": "Jun 30", "76": "Jun 30", "77": "Jun 30", "78": "Jul 1", "79": "Jun 30", "80": "Jul 1", "81": "Jul 2", "82": "Jul 1", "83": "Jul 2", "84": "Jul 1", "85": "Jul 2", "86": "Jul 3", "87": "Jul 3", "88": "Jul 3", "89": "Jul 4", "90": "Jul 4", "91": "Jul 5", "92": "Jul 5", "93": "Jul 6", "94": "Jul 6", "95": "Jul 7", "96": "Jul 7", "97": "Jul 9", "98": "Jul 10", "99": "Jul 10", "100": "Jul 11", "101": "Jul 14", "102": "Jul 15", "104": "Jul 19"}, "params": {"KAPPA": 0.62, "MU": 2.6, "HOME_GROUP": 75.0, "HOME_KO": 40.0, "NOISE_T": 70.0, "SEED": 2026}, "fixedResults": {"Mexico|South Africa": [2, 0]}};
+</script>
+<script>
+"use strict";
+/* ================= app state ================= */
+const CODES={"Mexico":"MEX","South Africa":"RSA","South Korea":"KOR","Czechia":"CZE","Canada":"CAN","Bosnia and Herzegovina":"BIH","Qatar":"QAT","Switzerland":"SUI","Brazil":"BRA","Morocco":"MAR","Haiti":"HAI","Scotland":"SCO","United States":"USA","Paraguay":"PAR","Australia":"AUS","Türkiye":"TUR","Germany":"GER","Curaçao":"CUW","Ivory Coast":"CIV","Ecuador":"ECU","Netherlands":"NED","Japan":"JPN","Sweden":"SWE","Tunisia":"TUN","Belgium":"BEL","Egypt":"EGY","Iran":"IRN","New Zealand":"NZL","Spain":"ESP","Cape Verde":"CPV","Saudi Arabia":"KSA","Uruguay":"URU","France":"FRA","Senegal":"SEN","Iraq":"IRQ","Norway":"NOR","Argentina":"ARG","Algeria":"ALG","Austria":"AUT","Jordan":"JOR","Portugal":"POR","DR Congo":"COD","Uzbekistan":"UZB","Colombia":"COL","England":"ENG","Croatia":"CRO","Ghana":"GHA","Panama":"PAN"};
+const ALIAS={"usa":"United States","united states of america":"United States","korea republic":"South Korea","korea":"South Korea","turkey":"Türkiye","turkiye":"Türkiye","cote d'ivoire":"Ivory Coast","côte d'ivoire":"Ivory Coast","ivory coast":"Ivory Coast","czech republic":"Czechia","cabo verde":"Cape Verde","bosnia":"Bosnia and Herzegovina","bosnia-herzegovina":"Bosnia and Herzegovina","dr congo":"DR Congo","congo dr":"DR Congo","democratic republic of the congo":"DR Congo","holland":"Netherlands","ir iran":"Iran","saudi":"Saudi Arabia"};
+function normTeam(n){ if(!n) return null; const k=String(n).trim();
+  if(CODES[k]) return k;
+  const low=k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+  for(const t of Object.keys(CODES)){ if(t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")===low) return t; }
+  return ALIAS[k.toLowerCase()]||ALIAS[low]||null; }
+const E=createEngine(DATA);
+const seedResults=()=>({group:Object.assign({},DATA.fixedResults),ko:[]});
+const S={results:seedResults(),meta:{"Mexico|South Africa":"seed"},opening:null,prev:null,cur:null,an:null,
+         opts:{nsim:30000,elo:true},log:[],lastFetch:null,storage:false,busy:false,apiKey:null};
+const $=id=>document.getElementById(id);
+const pf=(p,d=1)=>(p*100).toFixed(d);
+function toast(msg,err){const d=document.createElement("div");d.className="tmsg"+(err?" err":"");d.textContent=msg;$("toast").appendChild(d);setTimeout(()=>d.remove(),err?9000:5500);}
+
+/* ================= storage (Claude window.storage, else browser localStorage) ================= */
+const SK="wc26:livemodel:v1", KK="wc26:apikey:v1";
+const store={
+  mode(){ if(window.storage&&window.storage.get) return "claude";
+    try{ const t="__wc26t"; localStorage.setItem(t,"1"); localStorage.removeItem(t); return "browser"; }catch(e){ return null; } },
+  async get(k){ if(window.storage&&window.storage.get){ try{ const r=await window.storage.get(k); return r&&r.value!=null?String(r.value):null; }catch(e){ return null; } }
+    try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  async set(k,v){ if(window.storage&&window.storage.set){ try{ await window.storage.set(k,v); return true; }catch(e){ return false; } }
+    try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+  async del(k){ if(window.storage&&window.storage.delete){ try{ await window.storage.delete(k); }catch(e){} return; }
+    try{ localStorage.removeItem(k); }catch(e){} }
+};
+async function loadState(){ S.storage=store.mode();
+  if(!S.storage) return;
+  const raw=await store.get(SK);
+  if(raw){ try{ const v=JSON.parse(raw);
+    if(v&&v.v===1){ S.results=v.results||S.results; S.meta=v.meta||S.meta; S.opening=v.opening||null;
+      S.prev=v.prev||null; S.opts=Object.assign(S.opts,v.opts||{}); S.log=v.log||[]; S.lastFetch=v.lastFetch||null; }
+  }catch(e){} }
+  const k=await store.get(KK); if(k) S.apiKey=k;
+}
+async function saveState(){ if(!S.storage) return;
+  await store.set(SK,JSON.stringify({v:1,results:S.results,meta:S.meta,opening:S.opening,
+    prev:S.prev,opts:S.opts,log:S.log.slice(-12),lastFetch:S.lastFetch})); }
+
+/* ================= engine runs ================= */
+function setProg(x){const p=$("prog");p.style.display=x==null?"none":"block";if(x!=null)p.querySelector("i").style.width=(x*100).toFixed(1)+"%";}
+async function ensureOpening(){
+  if(S.opening&&S.opening.nsim===S.opts.nsim&&S.opening.elo===S.opts.elo) return;
+  E.setResults(seedResults()); E.setOptions({nsim:S.opts.nsim,eloUpdate:S.opts.elo});
+  const out=await E.run(x=>setProg(x*0.45));
+  S.opening={nsim:S.opts.nsim,elo:S.opts.elo,champ:out.champ,
+             adv:Object.fromEntries(Object.entries(out.group).map(([t,g])=>[t,g.adv]))};
+}
+async function runCurrent(showMovers=true){
+  if(S.busy) return; S.busy=true; $("btnRefresh").disabled=true;
+  try{
+    await ensureOpening();
+    E.setResults(S.results); E.setOptions({nsim:S.opts.nsim,eloUpdate:S.opts.elo});
+    S.an=E.computeAnalytic();
+    const out=await E.run(x=>setProg(0.45+x*0.55));
+    const prevSnap=S.prev;
+    S.cur=out;
+    renderAll(out,showMovers?prevSnap:null);
+    S.prev={champ:out.champ,adv:Object.fromEntries(Object.entries(out.group).map(([t,g])=>[t,g.adv]))};
+    await saveState();
+  }finally{ setProg(null); S.busy=false; $("btnRefresh").disabled=false; }
+}
+
+/* ================= refresh via Claude + web search ================= */
+function unplayedFixtures(){ return E.fixtures.map((f,i)=>({i,...f})).filter(f=>!S.results.group[f.key]); }
+async function fetchResults(){
+  const today=new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const want=unplayedFixtures().map(f=>`${f.i}: ${f.a} v ${f.b} (${f.date})`).join("\n");
+  const koKnown=S.results.ko.map(k=>`${k.stage} ${CODES[k.a]}-${CODES[k.b]}`).join(", ")||"none";
+  const prompt=`You are a sports-data fetcher. Today is ${today}. Use web search to find FINAL scores of 2026 FIFA World Cup matches that have already finished (full-time). Ignore live or upcoming games.
+Group-stage fixtures I still need, listed as "id: TeamA v TeamB (date)":
+${want||"(none — group stage complete)"}
+Also return any FINISHED knockout matches (Round of 32 onward; stage codes R32,R16,QF,SF,F) with the winner (after extra time or penalties if needed). Knockout results I already have: ${koKnown}. Skip the third-place match.
+Respond with ONLY minified JSON, no prose, no markdown fences, exactly this shape:
+{"matches":[{"id":<number from my list>,"g1":<goals TeamA>,"g2":<goals TeamB>}],"ko":[{"stage":"R32","t1":"<name>","t2":"<name>","g1":0,"g2":0,"w":"<winner name>"}]}
+Team names must be from this list: ${Object.keys(CODES).join(", ")}.
+If nothing new has finished, return {"matches":[],"ko":[]}.`;
+  const ctl=new AbortController(); const tm=setTimeout(()=>ctl.abort(),95000);
+  const body=JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
+    messages:[{role:"user",content:prompt}],
+    tools:[{type:"web_search_20250305",name:"web_search"}]});
+  async function call(withKey){
+    return fetch("https://api.anthropic.com/v1/messages",{method:"POST",signal:ctl.signal,
+      headers:withKey?{"Content-Type":"application/json","x-api-key":S.apiKey,
+        "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"}
+        :{"Content-Type":"application/json"},
+      body});
+  }
+  let data;
+  try{
+    if(S.apiKey){
+      const r=await call(true);
+      if(!r.ok) throw new Error("API "+r.status+(r.status===401?" — key rejected; check it at console.anthropic.com":""));
+      data=await r.json();
+    }else{
+      let r=null;
+      try{ r=await call(false); }catch(e){ r=null; }
+      if(!r||!r.ok){ const err=new Error("Outside Claude, score fetches need an Anthropic API key — click “API key” to add one, or use ✎ manual entry."); err.needKey=true; throw err; }
+      data=await r.json();
+    }
+  }finally{ clearTimeout(tm); }
+  const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+  const m=txt.replace(/```(json)?/gi,"").match(/\{[\s\S]*\}/);
+  if(!m) throw new Error("Could not parse results from the fetch — try again or enter scores manually.");
+  return JSON.parse(m[0]);
+}
+function mergeFetched(j){
+  const added=[],fixed=[],skipped=[];
+  const fx=E.fixtures;
+  for(const r of (j.matches||[])){
+    const f=fx[r.id|0];
+    const g1=Math.round(+r.g1),g2=Math.round(+r.g2);
+    if(!f||!Number.isFinite(g1)||!Number.isFinite(g2)||g1<0||g2<0||g1>15||g2>15){skipped.push(JSON.stringify(r));continue;}
+    if(S.meta[f.key]==="manual"){skipped.push(f.key+" (manual kept)");continue;}
+    const old=S.results.group[f.key];
+    if(old&&old[0]===g1&&old[1]===g2) continue;
+    S.results.group[f.key]=[g1,g2]; S.meta[f.key]="auto";
+    (old?fixed:added).push(`${CODES[f.a]} ${g1}–${g2} ${CODES[f.b]}`);
+  }
+  for(const r of (j.ko||[])){
+    const a=normTeam(r.t1),b=normTeam(r.t2),w=normTeam(r.w);
+    const g1=Math.round(+r.g1),g2=Math.round(+r.g2);
+    const stage=String(r.stage||"").toUpperCase();
+    if(!a||!b||!w||a===b||!["R32","R16","QF","SF","F"].includes(stage)||(w!==a&&w!==b)||
+       !Number.isFinite(g1)||!Number.isFinite(g2)||g1<0||g2<0||(g1!==g2&&((g1>g2)!==(w===a)))){skipped.push(JSON.stringify(r));continue;}
+    if(S.results.ko.some(k=>(k.a===a&&k.b===b)||(k.a===b&&k.b===a))) continue;
+    S.results.ko.push({stage,a,b,ga:g1,gb:g2,w});
+    added.push(`${stage}: ${CODES[a]} ${g1}–${g2} ${CODES[b]}${g1===g2?" ("+CODES[w]+" pens)":""}`);
+  }
+  return {added,fixed,skipped};
+}
+async function doRefresh(){
+  if(S.busy) return;
+  const btn=$("btnRefresh"); btn.disabled=true; btn.textContent="Fetching…";
+  try{
+    const j=await fetchResults();
+    const {added,fixed,skipped}=mergeFetched(j);
+    if(skipped.length) toast("Skipped "+skipped.length+" unverifiable item(s) from fetch.",true);
+    S.lastFetch=Date.now();
+    if(added.length||fixed.length){
+      S.log.unshift({t:Date.now(),items:added.concat(fixed.map(x=>x+" (corrected)"))});
+      btn.textContent="Simulating…";
+      await runCurrent(true);
+      toast("Ingested "+(added.length+fixed.length)+" result(s). Odds updated.");
+    }else{
+      renderStatus(); await saveState();
+      toast("No new final results found — odds unchanged.");
+    }
+  }catch(e){ if(e.needKey)$("keyRow").style.display="flex"; toast(e.message||String(e),true); }
+  finally{ btn.disabled=false; btn.textContent="↻ Refresh results"; }
+}
+$("btnKey").addEventListener("click",()=>{const k=$("keyRow");k.style.display=k.style.display==="none"?"flex":"none";});
+$("keyUse").addEventListener("click",async()=>{
+  const v=$("apiKey").value.trim();
+  if(!v){toast("Paste an API key first (sk-ant-…).",true);return;}
+  S.apiKey=v;
+  if($("keyRemember").checked) await store.set(KK,v); else await store.del(KK);
+  $("keyRow").style.display="none"; $("apiKey").value="";
+  toast("Key set"+($("keyRemember").checked?" and saved on this device.":" for this session."));
+});
+
+/* ================= rendering ================= */
+function dch(d,thr=0.05){ // delta chip
+  const pp=d*100;
+  if(!isFinite(pp)||Math.abs(pp)<thr) return `<span class="dchip z">·</span>`;
+  return `<span class="dchip ${pp>0?"up":"dn"}">${pp>0?"▲":"▼"} ${Math.abs(pp).toFixed(Math.abs(pp)<0.1?2:1)}</span>`;
+}
+function renderStatus(){
+  const ng=Object.keys(S.results.group).length, nk=S.results.ko.length;
+  const lf=S.lastFetch?new Date(S.lastFetch).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}):"never";
+  $("chips").innerHTML=
+    `<span class="chip"><b>${ng}</b>/72 group results in</span>`+
+    (nk?`<span class="chip"><b>${nk}</b> knockout result${nk>1?"s":""}</span>`:"")+
+    `<span class="chip">last refresh <b>${lf}</b></span>`+
+    `<span class="chip">${S.storage?"state saved on this device":"session-only (no storage)"}</span>`;
+  $("engineLine").innerHTML=`${(S.opts.nsim/1000)}k Monte Carlo runs · fixed seed ${DATA.params.SEED} (counter-based RNG: identical inputs → identical odds, so every Δ is caused by results, not noise) · Poisson goals, c=0.87 · rating nudge ${S.opts.elo?"on (K=40, margin-weighted)":"off"} · Annex C third-place allocation, all 495 combinations.`;
+  $("methodP").textContent=`Elo-style ratings (gap compression κ=${DATA.params.KAPPA} around 1800) drive a Poisson goal model (μ=${DATA.params.MU} total goals), with per-tournament form noise (σ=${DATA.params.NOISE_T} pts), host advantage (+${DATA.params.HOME_GROUP} group stage, +${DATA.params.HOME_KO} knockout at home venues), extra time at λ/3 and Elo-skewed penalties. Played matches are locked at their actual score; the optional rating nudge re-rates teams from results (K=40 on the raw scale, goal-margin multiplier, expectancy from the model's own pre-match line). Each refresh re-simulates the remaining tournament.`;
+  // ingest log
+  $("ingest").innerHTML=S.log.length?("Last ingested: "+S.log[0].items.slice(0,6).join(" · ")+(S.log[0].items.length>6?" · +"+(S.log[0].items.length-6)+" more":"")):"";
+}
+function renderBoard(out,prev){
+  const row=$("boardRow");
+  $("boardWhen").textContent=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+  if(!prev){ row.innerHTML=`<span class="quiet">${Object.keys(S.results.group).length>1?"Baseline established — refresh after the next final whistle.":"Opening odds set. Refresh after matches finish to see movement."}</span>`; return; }
+  const mv=Object.keys(out.champ).map(t=>[t,(out.champ[t]-(prev.champ[t]||0))*100])
+    .filter(x=>Math.abs(x[1])>=0.05).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,10);
+  row.innerHTML=mv.length?mv.map(([t,d])=>`<span class="cell"><span class="cd">${CODES[t]}</span><span class="${d>0?"up":"dn"}">${d>0?"▲":"▼"}${Math.abs(d).toFixed(Math.abs(d)<0.1?2:1)}</span></span>`).join("")
+    :`<span class="quiet">No title-odds movement ≥ 0.05pp this refresh.</span>`;
+}
+function renderLadder(out,prev){
+  const open=S.opening?S.opening.champ:{};
+  const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]).slice(0,16);
+  const mx=top[0][1]||1;
+  $("ladder").innerHTML=top.map(([t,p],i)=>{
+    const d=prev?(p-(prev.champ[t]||0)):0;
+    const fl=prev&&Math.abs(d)*100>=0.2?" flash":"";
+    return `<div class="lrow${fl}"><span class="rk num">${i+1}</span>
+      <span class="nm"><b>${t}</b><span class="cd mono">${CODES[t]}</span></span>
+      <span class="lbar"><i style="width:${(p/mx*100).toFixed(1)}%"></i></span>
+      <span class="lv num">${pf(p)}%</span>
+      <span style="display:flex;flex-direction:column;align-items:flex-end;gap:1px">${dch(d)}<span class="lo num">open ${pf(open[t]||0)}</span></span></div>`;
+  }).join("");
+}
+function renderFinals(out){
+  $("finals").innerHTML=out.finals.slice(0,5).map(f=>`<div class="frow"><span>${f[0]} v ${f[1]}</span><b class="num">${pf(f[2])}%</b></div>`).join("");
+  const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]);
+  const lead=top[0],second=top[1];
+  $("verdict").textContent=`${lead[0]} lead the board at ${pf(lead[1])}%, ${second[0]} next at ${pf(second[1])}%. Most likely final: ${out.finals[0][0]} v ${out.finals[0][1]} (${pf(out.finals[0][2])}%).`;
+}
+function renderStages(out){
+  const open=S.opening?S.opening.champ:{};
+  const base=DATA.ratings, live=out.ratingsLive;
+  const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const head=`<tr><th>Team</th><th>Elo</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>Final</th><th>Champion</th></tr>`;
+  $("stages").innerHTML=head+top.map(([t])=>{
+    const s=out.stages[t]; const ed=live[t]-base[t];
+    const eds=Math.abs(ed)>=0.5?`<span class="ed ${ed>0?'dchip up':'dchip dn'}" style="padding:0 4px">${ed>0?"+":""}${ed.toFixed(0)}</span>`:"";
+    return `<tr><td>${t}</td><td class="el num">${live[t].toFixed(0)}${eds}</td>`+
+      ["R32","R16","QF","SF","F","W"].map(k=>`<td class="num${k==="W"&&s[k]>=0.1?" hot":""}">${pf(s[k])}</td>`).join("")+`</tr>`;
+  }).join("");
+}
+function renderGroups(out,prev){
+  const fxByG={}; for(const f of S.an){ (fxByG[f.g]=fxByG[f.g]||[]).push(f); }
+  $("groups").innerHTML=Object.keys(DATA.groups).sort().map(g=>{
+    const teams=DATA.groups[g].slice().sort((a,b)=>out.group[b].adv-out.group[a].adv);
+    const rows=teams.map(t=>{
+      const gr=out.group[t]; const d=prev?(gr.adv-(prev.adv[t]||0)):0;
+      return `<div class="qrow"><span><b>${t}</b></span>
+        <span class="qb"><i style="width:${(gr.adv*100).toFixed(1)}%"></i></span>
+        <span class="qv num">${pf(gr.adv)}%</span>${dch(d,0.1)}</div>`;
+    }).join("");
+    const ms=fxByG[g].map(f=>{
+      const id=E.fixtures.findIndex(x=>x.key===f.key);
+      if(f.played){
+        const src=S.meta[f.key]||"auto";
+        return `<div class="match"><div class="mtop"><span>${f.date}</span><span>FT${src==="manual"?'<span class="tag man">manual</span>':(src==="seed"?'':'<span class="tag">auto</span>')}${src==="manual"?`<button class="pencil" data-clear="${f.key}" title="Clear manual result">✕</button>`:""}</span></div>
+          <div class="mteams"><span class="ta">${f.a}</span><span class="score num">${f.result[0]}–${f.result[1]}</span><span class="tb">${f.b}</span></div></div>`;
+      }
+      return `<div class="match" data-key="${f.key}"><div class="mtop"><span>${f.date}</span><span><button class="pencil" data-edit="${id}" title="Enter result">✎</button></span></div>
+        <div class="mteams"><span class="ta">${f.a}</span><span class="tb">${f.b}</span></div>
+        <div class="mbar"><span class="sw" style="width:${(f.W*100).toFixed(1)}%"></span><span class="sd" style="width:${(f.D*100).toFixed(1)}%"></span><span class="sl" style="width:${(f.L*100).toFixed(1)}%"></span></div>
+        <div class="mnum"><span>${pf(f.W)}</span><span>draw ${pf(f.D)}</span><span>${pf(f.L)}</span></div>
+        <div class="edit" style="display:none"><input inputmode="numeric" class="ga" placeholder="0">–<input inputmode="numeric" class="gb" placeholder="0"><button class="ok" data-save="${id}">Save</button><button class="no" data-cancel="1">✕</button></div></div>`;
+    }).join("");
+    return `<div class="gcard"><div class="gt">Group ${g}</div>
+      <div class="qhead"><span></span><span></span><span style="text-align:right">advance</span><span style="text-align:right">Δ</span></div>
+      ${rows}<div class="mlist">${ms}</div></div>`;
+  }).join("");
+}
+/* bracket */
+function renderBracket(out){
+  const W=196,H=46,GX=36,GY=12,X0=4;
+  const cols=[DATA.colOrder.r32,DATA.colOrder.r16,DATA.colOrder.qf,DATA.colOrder.sf,[104]];
+  const stageName=["Round of 32","Round of 16","Quarterfinal","Semifinal","Final"];
+  const pos={};
+  cols[0].forEach((m,i)=>pos[m]={x:X0,y:i*(H+GY)});
+  const srcOf=m=>{const s=String(m);return DATA.r16def[s]||DATA.qfdef[s]||DATA.sfdef[s]||(m===104?[101,102]:null);};
+  for(let c=1;c<5;c++) for(const m of cols[c]){const [a,b]=srcOf(m);pos[m]={x:X0+c*(W+GX),y:(pos[a].y+pos[b].y)/2};}
+  const totH=cols[0].length*(H+GY)-GY+8, totW=X0*2+5*W+4*GX;
+  const koByPair=new Map(S.results.ko.map(k=>[ [k.a,k.b].sort().join("|"),k ]));
+  let svg="";
+  for(let c=1;c<5;c++) for(const m of cols[c]){const [a,b]=srcOf(m);const x1=pos[a].x+W,x2=pos[m].x,mx=(x1+x2)/2;
+    for(const s of [a,b]) svg+=`<polyline points="${x1},${pos[s].y+H/2} ${mx},${pos[s].y+H/2} ${mx},${pos[m].y+H/2} ${x2},${pos[m].y+H/2}" fill="none" stroke="var(--line)" stroke-width="1.4"/>`;}
+  for(let c=0;c<5;c++) for(const m of cols[c]){
+    const p=pos[m], occ=out.nodes[m]||[];
+    const ko=out.koApplied&&out.koApplied[m]?koByPair.get([out.koApplied[m].a,out.koApplied[m].b].sort().join("|")):null;
+    const hd=`M${m} · ${stageName[c]} · ${DATA.koDates[String(m)]||""}${DATA.venue[String(m)]?" · "+DATA.venue[String(m)]:""}`;
+    svg+=`<g><rect x="${p.x}" y="${p.y}" width="${W}" height="${H}" rx="7" fill="${ko?"#FBF4E0":"var(--card)"}" stroke="${ko?"var(--gold)":"var(--line)"}" stroke-width="${ko?1.6:1}"/>`;
+    svg+=`<text x="${p.x+8}" y="${p.y+12}" font-size="8.2" letter-spacing=".08em" fill="var(--mut)" font-family="ui-monospace,Menlo,monospace">${hd.toUpperCase()}</text>`;
+    if(ko){
+      const l1=`${ko.a} ${ko.ga}–${ko.gb} ${ko.b}${ko.ga===ko.gb?" · pens":""}`;
+      svg+=`<text x="${p.x+8}" y="${p.y+26}" font-size="10.6" font-weight="700" fill="var(--ink)">${l1.length>34?l1.slice(0,33)+"…":l1}</text>`;
+      svg+=`<text x="${p.x+8}" y="${p.y+39}" font-size="9.5" fill="var(--gold)" font-weight="700">${ko.w} advance</text>`;
+    }else{
+      const t1=occ[0],t2=occ[1];
+      if(t1) svg+=`<text x="${p.x+8}" y="${p.y+26}" font-size="10.6" font-weight="700" fill="var(--ink)">${t1[0]}</text><text x="${p.x+W-8}" y="${p.y+26}" font-size="10.2" text-anchor="end" fill="var(--mut)" font-family="ui-monospace,Menlo,monospace">${pf(t1[1],0)}%</text>`;
+      if(t2) svg+=`<text x="${p.x+8}" y="${p.y+39}" font-size="10.6" font-weight="600" fill="#43544A">${t2[0]}</text><text x="${p.x+W-8}" y="${p.y+39}" font-size="10.2" text-anchor="end" fill="var(--mut)" font-family="ui-monospace,Menlo,monospace">${pf(t2[1],0)}%</text>`;
+    }
+    svg+=`</g>`;
+  }
+  const el=$("bracket"); el.setAttribute("viewBox",`0 0 ${totW} ${totH}`); el.setAttribute("width",totW); el.setAttribute("height",totH); el.innerHTML=svg;
+}
+function renderKoControls(){
+  const sel=Object.keys(CODES).sort().map(t=>`<option>${t}</option>`).join("");
+  $("koA").innerHTML=sel; $("koB").innerHTML=sel;
+  $("koList").innerHTML=S.results.ko.map((k,i)=>`<span class="tag" style="margin-left:8px">${k.stage} ${CODES[k.a]} ${k.ga}–${k.gb} ${CODES[k.b]} <button class="pencil" data-kodel="${i}">✕</button></span>`).join("");
+}
+function renderAll(out,prev){
+  renderStatus(); renderBoard(out,prev); renderLadder(out,prev); renderFinals(out);
+  renderStages(out); renderGroups(out,prev); renderBracket(out); renderKoControls();
+}
+
+/* ================= events ================= */
+document.addEventListener("click",async e=>{
+  const t=e.target;
+  if(t.dataset.edit!==undefined&&t.dataset.edit!==""){const card=t.closest(".match");card.querySelector(".edit").style.display="flex";card.querySelector(".ga").focus();return;}
+  if(t.dataset.cancel){t.closest(".edit").style.display="none";return;}
+  if(t.dataset.save!==undefined&&t.dataset.save!==""){
+    const id=+t.dataset.save,f=E.fixtures[id],box=t.closest(".edit");
+    const ga=Math.round(+box.querySelector(".ga").value),gb=Math.round(+box.querySelector(".gb").value);
+    if(!Number.isFinite(ga)||!Number.isFinite(gb)||ga<0||gb<0||ga>15||gb>15){toast("Enter goals 0–15 for both teams.",true);return;}
+    S.results.group[f.key]=[ga,gb];S.meta[f.key]="manual";
+    S.log.unshift({t:Date.now(),items:[`${CODES[f.a]} ${ga}–${gb} ${CODES[f.b]} (manual)`]});
+    await runCurrent(true);return;}
+  if(t.dataset.clear){delete S.results.group[t.dataset.clear];delete S.meta[t.dataset.clear];await runCurrent(true);return;}
+  if(t.dataset.kodel!==undefined&&t.dataset.kodel!==""){S.results.ko.splice(+t.dataset.kodel,1);await runCurrent(true);return;}
+});
+$("koGA").addEventListener("input",syncKoWin);$("koGB").addEventListener("input",syncKoWin);
+$("koA").addEventListener("change",syncKoWin);$("koB").addEventListener("change",syncKoWin);
+function syncKoWin(){const eq=+$("koGA").value===+$("koGB").value&&$("koGA").value!=="";
+  $("koWinWrap").style.display=eq?"inline":"none";
+  if(eq)$("koWin").innerHTML=`<option>${$("koA").value}</option><option>${$("koB").value}</option>`;}
+$("koAdd").addEventListener("click",async()=>{
+  const a=$("koA").value,b=$("koB").value,ga=Math.round(+$("koGA").value),gb=Math.round(+$("koGB").value);
+  if(a===b||!Number.isFinite(ga)||!Number.isFinite(gb)||ga<0||gb<0){toast("Pick two different teams and valid scores.",true);return;}
+  const w=ga>gb?a:(gb>ga?b:$("koWin").value);
+  S.results.ko.push({stage:$("koStage").value,a,b,ga,gb,w});
+  S.log.unshift({t:Date.now(),items:[`${$("koStage").value}: ${CODES[a]} ${ga}–${gb} ${CODES[b]} (manual)`]});
+  await runCurrent(true);
+});
+$("btnRefresh").addEventListener("click",doRefresh);
+$("btnReset").addEventListener("click",async()=>{
+  S.results=seedResults();S.meta={"Mexico|South Africa":"seed"};S.prev=null;S.log=[];S.lastFetch=null;
+  await runCurrent(false);toast("Back to opening state.");});
+$("selN").addEventListener("change",async e=>{S.opts.nsim=+e.target.value;S.opening=null;S.prev=null;await runCurrent(false);toast("Re-baselined at "+(S.opts.nsim/1000)+"k sims — movement deltas reset.");});
+$("chkElo").addEventListener("change",async e=>{S.opts.elo=e.target.checked;S.opening=null;S.prev=null;await runCurrent(false);toast("Rating nudge "+(S.opts.elo?"on":"off")+" — re-baselined.");});
+
+/* ================= boot ================= */
+(async function(){
+  await loadState();
+  $("selN").value=String(S.opts.nsim); $("chkElo").checked=!!S.opts.elo;
+  $("subline").textContent="Monte Carlo tournament simulator · "+new Date().toLocaleDateString([],{month:"long",day:"numeric",year:"numeric"});
+  await runCurrent(!!S.prev);
+})();
+</script>
+</body>
+</html>
