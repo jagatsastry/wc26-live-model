@@ -93,8 +93,7 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 .st .sep{color:var(--line);padding:0 7px}
 .st td.quiet{text-align:left;color:var(--mut);font-weight:400}
 .stwrap{overflow-x:auto}
-.duo{display:grid;grid-template-columns:1fr;gap:6px 22px}
-@media(min-width:1180px){.duo{grid-template-columns:1fr 1fr}}
+.duo{display:grid;grid-template-columns:1fr;gap:8px}
 .byline{margin-top:18px;font-size:12px;color:var(--mut);text-align:center;letter-spacing:.06em;text-transform:uppercase}
 /* groups */
 .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
@@ -736,7 +735,9 @@ async function runCurrent(showMovers=true){
   if(S.busy) return; S.busy=true; $("btnRefresh").disabled=true;
   try{
     await ensureOpening();
-    E.setResults(S.results); E.setOptions({nsim:S.opts.nsim,eloUpdate:S.opts.elo});
+    E.setOptions({nsim:S.opts.nsim,eloUpdate:S.opts.elo});
+    backfillPreds(); // mutates engine results; real results re-applied below
+    E.setResults(S.results);
     S.an=E.computeAnalytic();
     const out=await E.run(x=>setProg(0.45+x*0.55));
     const prevSnap=S.prev;
@@ -886,26 +887,39 @@ function topScores(la,lb,n){
   o.sort((x,y)=>y[2]-x[2]);
   return o.slice(0,n);
 }
+function snapPred(row){
+  return {date:row.date,a:row.a,b:row.b,W:row.W,D:row.D,L:row.L,xga:row.xga,xgb:row.xgb,
+    ft:topScores(row.xga,row.xgb,2),h1:topScores(row.xga*0.45,row.xgb*0.45,3),h2:topScores(row.xga*0.55,row.xgb*0.55,3)};
+}
+function backfillPreds(){ // reconstruct exact pre-match lines for played fixtures that never got one (e.g. seeded opener)
+  for(const f of E.fixtures){
+    if(!S.results.group[f.key]||S.preds[f.key]) continue;
+    const prior={group:{},ko:[]};
+    for(const g of E.fixtures){
+      const r=S.results.group[g.key];
+      if(r&&(dkey(g.date)<dkey(f.date)||(dkey(g.date)===dkey(f.date)&&g.idx<f.idx))) prior.group[g.key]=r;
+    }
+    E.setResults(prior); // engine replays Elo nudges from pre-match results only
+    S.preds[f.key]=Object.assign(snapPred(E.computeAnalytic().find(x=>x.key===f.key)),{retro:true});
+  }
+}
 const fmtScores=s=>s.map(([i,j,p])=>`<span class="sc">${i}–${j}</span><span class="pp">${pf(p,0)}%</span>`).join(`<span class="sep">·</span>`);
 const fmt1x2=p=>`<span class="sc">${pf(p.W,0)}</span><span class="sep">·</span><span class="sc">${pf(p.D,0)}</span><span class="sep">·</span><span class="sc">${pf(p.L,0)}</span>`;
 function renderNext(){
   const an=S.an.slice().sort((x,y)=>dkey(x.date)-dkey(y.date));
-  for(const f of an) if(!f.played){ // keep a pre-match line for EVERY open fixture; frozen automatically once played
-    S.preds[f.key]={date:f.date,a:f.a,b:f.b,W:f.W,D:f.D,L:f.L,xga:f.xga,xgb:f.xgb,
-      ft:topScores(f.xga,f.xgb,2),h1:topScores(f.xga*0.45,f.xgb*0.45,3),h2:topScores(f.xga*0.55,f.xgb*0.55,3)};
-  }
+  for(const f of an) if(!f.played) S.preds[f.key]=snapPred(f); // pre-match line for EVERY open fixture; frozen once played
   const up=an.filter(f=>!f.played).slice(0,5);
   const done=an.filter(f=>f.played&&S.preds[f.key]).slice(-5).reverse(); // most recent first
   const lead=f=>{const p=S.preds[f.key];
     return `<td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td><td class="num">${fmt1x2(p)}</td>`;};
   $("nextm").innerHTML=
-    `<tr><th>Date</th><th>Match</th><th>1 · X · 2</th><th>xG</th><th>FT score</th><th>1st half</th><th>2nd half</th></tr>`+
+    `<tr><th>Date</th><th>Match</th><th>Win · Draw · Win %</th><th>Exp. goals</th><th>Likely final score</th><th>Likely 1st half</th><th>Likely 2nd half</th></tr>`+
     (up.map(f=>{const p=S.preds[f.key];
       return `<tr>${lead(f)}<td class="num">${p.xga.toFixed(1)}–${p.xgb.toFixed(1)}</td>`+
         `<td class="half">${fmtScores(p.ft)}</td><td class="half">${fmtScores(p.h1)}</td><td class="half">${fmtScores(p.h2)}</td></tr>`;
     }).join("")||`<tr><td class="quiet" colspan="7">Group stage complete — no upcoming group matches.</td></tr>`);
   $("prevm").innerHTML=
-    `<tr><th>Date</th><th>Match</th><th>1 · X · 2</th><th>Pred score</th><th>Result</th><th>vs model</th></tr>`+
+    `<tr><th>Date</th><th>Match</th><th>Win · Draw · Win %</th><th>Predicted score</th><th>Final score</th><th>Model verdict</th></tr>`+
     (done.map(f=>{const p=S.preds[f.key];
       const [ga,gb]=f.result;
       const o=ga>gb?"W":(ga===gb?"D":"L");
