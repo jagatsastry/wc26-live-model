@@ -158,6 +158,8 @@ const out = await E.run(() => {});
 
 const today = new Date();
 const candidates = [];
+const mid = q => (q.bid != null && q.ask != null) ? (q.bid + q.ask) / 2 : q.last;
+const market = { ts: new Date().toISOString(), source: "Kalshi (Robinhood prediction markets)", matches: {}, groups: {}, champ: {} };
 
 /* match-winner markets */
 const game = await allMarkets("KXWCGAME", "open");
@@ -166,10 +168,23 @@ for (const m of game) (byEvent[m.event_ticker] ??= []).push(m);
 for (const [ev, ms] of Object.entries(byEvent)) {
   const tk = /KXWCGAME-(\d{2})([A-Z]{3})(\d{2})([A-Z]{3})([A-Z]{3})$/.exec(ev);
   if (!tk) continue;
+  const a = codeMap[tk[4]], b = codeMap[tk[5]];
+  const fAny = E.fixtures.find(x => (x.a === a && x.b === b) || (x.a === b && x.b === a));
+  if (fAny) { // snapshot implied probs for the website, regardless of horizon
+    const imp = {};
+    for (const m of ms) {
+      const code = m.ticker.split("-").pop();
+      const v = mid($$(m));
+      if (v == null) continue;
+      if (code === "TIE") imp.D = v;
+      else if (codeMap[code] === fAny.a) imp.W = v;
+      else if (codeMap[code] === fAny.b) imp.L = v;
+    }
+    if (imp.W != null || imp.D != null || imp.L != null) market.matches[fAny.key] = imp;
+  }
   const date = new Date(`20${tk[1]} ${tk[2]} ${tk[3]} 12:00 UTC`);
   const daysOut = (date - today) / 864e5;
   if (daysOut < -0.7 || daysOut > DAYS) continue;
-  const a = codeMap[tk[4]], b = codeMap[tk[5]];
   const f = an.find(x => !x.played && ((x.a === a && x.b === b) || (x.a === b && x.b === a)));
   if (!f) continue;
   for (const m of ms) {
@@ -194,6 +209,7 @@ for (const m of await allMarkets("KXWCGROUPWIN", "open")) {
   if (!team || !out.group[team]) continue;
   const p = out.group[team].p1;
   const q = $$(m);
+  if (mid(q) != null) market.groups[team] = mid(q);
   candidates.push({
     kind: "GROUP", horizon: "by Jun 27", ticker: m.ticker,
     label: `${team} wins Group ${grp}`,
@@ -207,6 +223,7 @@ for (const m of await allMarkets("KXMENWORLDCUP", "open")) {
   if (!team || out.champ[team] == null) continue;
   const p = out.champ[team];
   const q = $$(m);
+  if (mid(q) != null) market.champ[team] = mid(q);
   candidates.push({
     kind: "CHAMP", horizon: "Jul 19", ticker: m.ticker,
     label: `${team} win World Cup`,
@@ -225,6 +242,10 @@ for (const c of candidates) {
   }
 }
 plays.sort((x, y) => y.kelly * y.edge - x.kelly * x.edge); // weight: edge × kelly ≈ EV growth
+
+const MARKET_FILE = path.join(HERE, "..", "market.json");
+fs.writeFileSync(MARKET_FILE, JSON.stringify(market, null, 1));
+console.log(`Wrote market snapshot (${Object.keys(market.matches).length} matches, ${Object.keys(market.groups).length} group, ${Object.keys(market.champ).length} champ) to market.json`);
 
 const ts = new Date().toISOString();
 const log = candidates.map(c => ({
