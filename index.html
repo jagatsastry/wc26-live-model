@@ -79,7 +79,7 @@ h2 span.note{font-size:11px;letter-spacing:.02em;text-transform:none;color:var(-
 .panel .big{font-size:15px;color:var(--ink)}
 /* stage table */
 table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.st th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--pitch);padding:8px 10px;text-align:right}
+.st th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#fff;background:var(--pitch);padding:8px 10px;text-align:right;cursor:pointer;user-select:none}
 .st th:first-child{text-align:left}
 .st td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right;font-size:13px}
 .st td:first-child{text-align:left;font-weight:600}
@@ -870,11 +870,20 @@ function renderFinals(out){
   const lead=top[0],second=top[1];
   $("verdict").textContent=`${lead[0]} lead the board at ${pf(lead[1])}%, ${second[0]} next at ${pf(second[1])}%. Most likely final: ${out.finals[0][0]} v ${out.finals[0][1]} (${pf(out.finals[0][2])}%).`;
 }
+let stSort={k:"W",d:-1};
 function renderStages(out){
+  renderStages.last=out;
   const open=S.opening?S.opening.champ:{};
   const base=DATA.ratings, live=out.ratingsLive;
   const top=Object.entries(out.champ).sort((a,b)=>b[1]-a[1]).slice(0,20);
-  const head=`<tr><th>Team</th><th>Elo</th><th>R32</th><th>R16</th><th>QF</th><th>SF</th><th>Final</th><th>Champion</th></tr>`;
+  top.sort(([a],[b])=>{
+    if(stSort.k==="team") return stSort.d*a.localeCompare(b);
+    const va=stSort.k==="elo"?live[a]:out.stages[a][stSort.k];
+    const vb=stSort.k==="elo"?live[b]:out.stages[b][stSort.k];
+    return stSort.d*(va-vb);
+  });
+  const cols=[["team","Team"],["elo","Elo"],["R32","R32"],["R16","R16"],["QF","QF"],["SF","SF"],["F","Final"],["W","Champion"]];
+  const head=`<tr>${cols.map(([k,lbl])=>`<th data-sk="${k}">${lbl}${stSort.k===k?(stSort.d<0?" ▾":" ▴"):""}</th>`).join("")}</tr>`;
   $("stages").innerHTML=head+top.map(([t])=>{
     const s=out.stages[t]; const ed=live[t]-base[t];
     const eds=Math.abs(ed)>=0.5?`<span class="ed ${ed>0?'dchip up':'dchip dn'}" style="padding:0 4px">${ed>0?"+":""}${ed.toFixed(0)}</span>`:"";
@@ -882,6 +891,13 @@ function renderStages(out){
       ["R32","R16","QF","SF","F","W"].map(k=>`<td class="num${k==="W"&&s[k]>=0.1?" hot":""}">${pf(s[k])}</td>`).join("")+`</tr>`;
   }).join("");
 }
+$("stages").addEventListener("click",e=>{
+  const th=e.target.closest("th[data-sk]"); if(!th||!renderStages.last) return;
+  const k=th.dataset.sk;
+  if(stSort.k===k) stSort.d=-stSort.d;
+  else stSort={k,d:k==="team"?1:-1};
+  renderStages(renderStages.last);
+});
 function renderGroups(out,prev){
   const fxByG={}; for(const f of S.an){ (fxByG[f.g]=fxByG[f.g]||[]).push(f); }
   $("groups").innerHTML=Object.keys(DATA.groups).sort().map(g=>{
