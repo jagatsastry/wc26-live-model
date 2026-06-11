@@ -87,9 +87,14 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 .st tr:last-child td{border-bottom:0}
 .st td.hot{background:#F4EAD2}
 .st td.lft{text-align:left}
-.st td.half{font-size:11.5px;color:var(--mut);white-space:nowrap}
-.st tr.done td{background:#FBF8EF}
+.st td.half{font-size:12.5px;white-space:nowrap}
+.st .sc{font-weight:700}
+.st .pp{color:var(--mut);font-size:11px;margin-left:4px}
+.st .sep{color:var(--line);padding:0 7px}
+.st td.quiet{text-align:left;color:var(--mut);font-weight:400}
 .stwrap{overflow-x:auto}
+.duo{display:grid;grid-template-columns:1fr;gap:6px 22px}
+@media(min-width:1180px){.duo{grid-template-columns:1fr 1fr}}
 .byline{margin-top:18px;font-size:12px;color:var(--mut);text-align:center;letter-spacing:.06em;text-transform:uppercase}
 /* groups */
 .ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:18px}
@@ -168,8 +173,16 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
 <div class="ingest" id="ingest"></div>
 
 <section>
-  <h2>Next 5 matches <span class="note">1 · X · 2 = win/draw/win · halves split 45/55 of xG · line locked at kickoff, played rows show actual vs model</span></h2>
-  <div class="stwrap"><table class="st" id="nextm"></table></div>
+  <div class="duo">
+    <div>
+      <h2>Last 5 matches <span class="note">pre-match line retained · ✓/✗ = outcome call · Δ vs predicted score</span></h2>
+      <div class="stwrap"><table class="st" id="prevm"></table></div>
+    </div>
+    <div>
+      <h2>Next 5 matches <span class="note">1 · X · 2 = win/draw/win % · halves split 45/55 of xG</span></h2>
+      <div class="stwrap"><table class="st" id="nextm"></table></div>
+    </div>
+  </div>
 </section>
 
 <section>
@@ -765,11 +778,14 @@ If nothing new has finished, return {"matches":[],"ko":[]}.`;
       const r=await call(true);
       if(!r.ok) throw new Error("API "+r.status+(r.status===401?" — key rejected; check it at console.anthropic.com":""));
       data=await r.json();
-    }else{
+    }else if(S.storage==="claude"){ // inside Claude the fetch is proxied keylessly; on the open web it would only fail CORS preflight
       let r=null;
       try{ r=await call(false); }catch(e){ r=null; }
       if(!r||!r.ok){ const err=new Error("Outside Claude, score fetches need an Anthropic API key — click “API key” to add one, or use ✎ manual entry."); err.needKey=true; throw err; }
       data=await r.json();
+    }else{
+      const err=new Error("Outside Claude, score fetches need an Anthropic API key — click “API key” to add one, or use ✎ manual entry.");
+      err.needKey=true; throw err;
     }
   }finally{ clearTimeout(tm); }
   const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
@@ -860,7 +876,7 @@ function renderBoard(out,prev){
   row.innerHTML=mv.length?mv.map(([t,d])=>`<span class="cell"><span class="cd">${CODES[t]}</span><span class="${d>0?"up":"dn"}">${d>0?"▲":"▼"}${Math.abs(d).toFixed(Math.abs(d)<0.1?2:1)}</span></span>`).join("")
     :`<span class="quiet">No title-odds movement ≥ 0.05pp this refresh.</span>`;
 }
-/* next-5 matches table: analytic odds + per-half scorelines, prediction retained once played */
+/* prev-5 / next-5 match tables: analytic odds + per-half scorelines, prediction retained once played */
 const MORD={Jun:6,Jul:7};
 const dkey=d=>{const m=/([A-Za-z]+) (\d+)/.exec(d);return (MORD[m[1]]||6)*100+(+m[2]);};
 function pois(l,k){let p=Math.exp(-l);for(let i=1;i<=k;i++)p*=l/i;return p;}
@@ -870,20 +886,27 @@ function topScores(la,lb,n){
   o.sort((x,y)=>y[2]-x[2]);
   return o.slice(0,n);
 }
-const fmtScores=s=>s.map(([i,j,p])=>`${i}–${j}&hairsp;<span class="num">${pf(p,0)}%</span>`).join(" · ");
+const fmtScores=s=>s.map(([i,j,p])=>`<span class="sc">${i}–${j}</span><span class="pp">${pf(p,0)}%</span>`).join(`<span class="sep">·</span>`);
+const fmt1x2=p=>`<span class="sc">${pf(p.W,0)}</span><span class="sep">·</span><span class="sc">${pf(p.D,0)}</span><span class="sep">·</span><span class="sc">${pf(p.L,0)}</span>`;
 function renderNext(){
   const an=S.an.slice().sort((x,y)=>dkey(x.date)-dkey(y.date));
-  const up=an.filter(f=>!f.played).slice(0,5);
-  for(const f of up){ // refresh the pre-match line while still open; frozen automatically once played
+  for(const f of an) if(!f.played){ // keep a pre-match line for EVERY open fixture; frozen automatically once played
     S.preds[f.key]={date:f.date,a:f.a,b:f.b,W:f.W,D:f.D,L:f.L,xga:f.xga,xgb:f.xgb,
       ft:topScores(f.xga,f.xgb,2),h1:topScores(f.xga*0.45,f.xgb*0.45,3),h2:topScores(f.xga*0.55,f.xgb*0.55,3)};
   }
-  const done=an.filter(f=>f.played&&S.preds[f.key]).slice(-5);
-  const head=`<tr><th>Date</th><th>Match</th><th>1 · X · 2</th><th>xG</th><th>FT score</th><th>1st half</th><th>2nd half</th><th>Result vs model</th></tr>`;
-  const row=f=>{
-    const p=S.preds[f.key];
-    let res=`<span class="half">upcoming</span>`;
-    if(f.played){
+  const up=an.filter(f=>!f.played).slice(0,5);
+  const done=an.filter(f=>f.played&&S.preds[f.key]).slice(-5).reverse(); // most recent first
+  const lead=f=>{const p=S.preds[f.key];
+    return `<td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td><td class="num">${fmt1x2(p)}</td>`;};
+  $("nextm").innerHTML=
+    `<tr><th>Date</th><th>Match</th><th>1 · X · 2</th><th>xG</th><th>FT score</th><th>1st half</th><th>2nd half</th></tr>`+
+    (up.map(f=>{const p=S.preds[f.key];
+      return `<tr>${lead(f)}<td class="num">${p.xga.toFixed(1)}–${p.xgb.toFixed(1)}</td>`+
+        `<td class="half">${fmtScores(p.ft)}</td><td class="half">${fmtScores(p.h1)}</td><td class="half">${fmtScores(p.h2)}</td></tr>`;
+    }).join("")||`<tr><td class="quiet" colspan="7">Group stage complete — no upcoming group matches.</td></tr>`);
+  $("prevm").innerHTML=
+    `<tr><th>Date</th><th>Match</th><th>1 · X · 2</th><th>Pred score</th><th>Result</th><th>vs model</th></tr>`+
+    (done.map(f=>{const p=S.preds[f.key];
       const [ga,gb]=f.result;
       const o=ga>gb?"W":(ga===gb?"D":"L");
       const po=o==="W"?p.W:(o==="D"?p.D:p.L);
@@ -891,17 +914,12 @@ function renderNext(){
       const hit=fav===o;
       const pex=pois(p.xga,ga)*pois(p.xgb,gb);
       const [pi,pj]=p.ft[0];
-      const ds=(ga===pi&&gb===pj)?"exact hit":`Δ ${ga-pi>=0?"+":""}${ga-pi}/${gb-pj>=0?"+":""}${gb-pj}`;
-      res=`<b class="num">${ga}–${gb}</b> <span class="dchip ${hit?"up":"dn"}">${hit?"✓":"✗"} call</span><br>`+
-          `<span class="half">outcome had ${pf(po)}% · exact score ${pf(pex)}% · ${ds}</span>`;
-    }
-    return `<tr${f.played?' class="done"':""}><td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td>`+
-      `<td class="num">${pf(p.W)} · ${pf(p.D)} · ${pf(p.L)}</td>`+
-      `<td class="num">${p.xga.toFixed(1)}–${p.xgb.toFixed(1)}</td>`+
-      `<td class="half">${fmtScores(p.ft)}</td><td class="half">${fmtScores(p.h1)}</td><td class="half">${fmtScores(p.h2)}</td>`+
-      `<td>${res}</td></tr>`;
-  };
-  $("nextm").innerHTML=head+done.map(row).join("")+up.map(row).join("");
+      const ds=(ga===pi&&gb===pj)?`<span class="dchip up">exact hit</span>`
+        :`<span class="dchip ${hit?"up":"dn"}">Δ ${ga-pi>0?"+":""}${ga-pi}/${gb-pj>0?"+":""}${gb-pj}</span>`;
+      return `<tr>${lead(f)}<td class="half"><span class="sc">${pi}–${pj}</span><span class="pp">${pf(p.ft[0][2],0)}%</span></td>`+
+        `<td class="num" style="font-weight:700">${ga}–${gb}</td>`+
+        `<td class="half"><span class="dchip ${hit?"up":"dn"}">${hit?"✓":"✗"} call</span> ${ds}<span class="pp">outcome ${pf(po,0)}% · exact ${pf(pex,0)}%</span></td></tr>`;
+    }).join("")||`<tr><td class="quiet" colspan="6">No completed matches with a stored pre-match line yet.</td></tr>`);
 }
 function renderLadder(out,prev){
   const open=S.opening?S.opening.champ:{};
@@ -1034,7 +1052,7 @@ document.addEventListener("click",async e=>{
     S.results.group[f.key]=[ga,gb];S.meta[f.key]="manual";
     S.log.unshift({t:Date.now(),items:[`${CODES[f.a]} ${ga}–${gb} ${CODES[f.b]} (manual)`]});
     await runCurrent(true);return;}
-  if(t.dataset.clear){delete S.results.group[t.dataset.clear];delete S.meta[t.dataset.clear];await runCurrent(true);return;}
+  if(t.dataset.clear){delete S.results.group[t.dataset.clear];delete S.meta[t.dataset.clear];delete S.preds[t.dataset.clear];await runCurrent(true);return;}
   if(t.dataset.kodel!==undefined&&t.dataset.kodel!==""){S.results.ko.splice(+t.dataset.kodel,1);await runCurrent(true);return;}
 });
 $("koGA").addEventListener("input",syncKoWin);$("koGB").addEventListener("input",syncKoWin);
