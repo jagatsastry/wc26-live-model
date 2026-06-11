@@ -942,11 +942,10 @@ function renderNext(){
     return `<td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td>`+
       oddsCell(anOpenMap&&anOpenMap[f.key])+oddsCell(p)+oddsCell(p.mkt,p);};
   $("nextm").innerHTML=
-    `<tr><th>Date</th><th>Match</th><th>Model opening</th><th>Model now</th><th>Market</th><th>Exp. goals</th><th>Likely final score</th></tr>`+
+    `<tr><th>Date</th><th>Match</th><th>Model opening</th><th>Model now</th><th>Market</th><th>Exp. goals</th></tr>`+
     (up.map(f=>{const p=S.preds[f.key];
-      return `<tr>${lead(f)}<td class="num">${p.xga.toFixed(1)}–${p.xgb.toFixed(1)}</td>`+
-        `<td class="half"><span class="sc">${p.ft[0][0]}–${p.ft[0][1]}</span><span class="pp">${pf(p.ft[0][2],0)}%</span></td></tr>`;
-    }).join("")||`<tr><td class="quiet" colspan="7">Group stage complete — no upcoming group matches.</td></tr>`);
+      return `<tr>${lead(f)}<td class="num">${p.xga.toFixed(1)}–${p.xgb.toFixed(1)}</td></tr>`;
+    }).join("")||`<tr><td class="quiet" colspan="6">Group stage complete — no upcoming group matches.</td></tr>`);
   $("prevm").innerHTML=
     `<tr><th>Date</th><th>Match</th><th>Model opening</th><th>Model pre-game</th><th>Market pre-game</th><th>Final score</th><th>Model verdict</th></tr>`+
     (done.map(f=>{const p=S.preds[f.key];
