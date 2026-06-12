@@ -1,0 +1,15 @@
+[Unit]
+Description=WC26 live model server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=wc26
+WorkingDirectory=/opt/wc26
+ExecStart=/usr/bin/node server.mjs
+EnvironmentFile=/etc/wc26/env
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

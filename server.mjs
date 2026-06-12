@@ -403,6 +403,19 @@ function scheduleRefresh() {
 
 /* ---------- Express app ---------- */
 const app = express();
+const HOST = process.env.HOST || "127.0.0.1"; // only reachable via the auth proxy in production
+app.set("trust proxy", 1);
+
+// Defense-in-depth behind oauth2-proxy: if ALLOWED_EMAILS is set, require the
+// X-Forwarded-Email header it injects to match (comma-separated allowlist).
+const ALLOWED = (process.env.ALLOWED_EMAILS || "").split(",").map(e => e.trim().toLowerCase()).filter(Boolean);
+if (ALLOWED.length) {
+  app.use((req, res, next) => {
+    const email = (req.get("x-forwarded-email") || "").toLowerCase();
+    if (ALLOWED.includes(email)) return next();
+    res.status(401).send("Unauthorized");
+  });
+}
 
 app.use((req, res, next) => {
   // Don't cache API responses
@@ -462,7 +475,7 @@ await refresh();             // initial data load
 scheduleAnalysis(state.results); // kick off first model run
 scheduleRefresh();           // start polling loop
 
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`\n  Server ready: http://localhost:${PORT}`);
   console.log(`  API: /api/scores  /api/market  /api/analysis  /api/status`);
   console.log(`  SSE: /sse  (live push — scores refresh every 30s during matches, 90s otherwise)\n`);

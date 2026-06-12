@@ -1,0 +1,13 @@
+[Unit]
+Description=oauth2-proxy (Google sign-in for WC26)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=oauth2proxy
+ExecStart=/usr/local/bin/oauth2-proxy --config=/etc/oauth2-proxy/config.cfg
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,7 @@
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy 127.0.0.1:4180 {
+		# stream SSE immediately instead of buffering
+		flush_interval -1
+	}
+}
