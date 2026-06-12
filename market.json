@@ -1,5 +1,5 @@
 {
- "ts": "2026-06-12T03:47:48.110Z",
+ "ts": "2026-06-12T04:33:15.345Z",
  "source": "Kalshi (Robinhood prediction markets)",
  "matches": {
   "DR Congo|Uzbekistan": {
@@ -9,12 +9,12 @@
   },
   "Senegal|Iraq": {
    "D": 0.195,
-   "W": 0.69,
+   "W": 0.705,
    "L": 0.11499999999999999
   },
   "Türkiye|United States": {
-   "L": 0.385,
-   "W": 0.365,
+   "L": 0.375,
+   "W": 0.375,
    "D": 0.265
   },
   "Japan|Sweden": {
@@ -24,17 +24,17 @@
   },
   "Czechia|Mexico": {
    "D": 0.255,
-   "L": 0.555,
-   "W": 0.185
+   "L": 0.545,
+   "W": 0.195
   },
   "Bosnia and Herzegovina|Qatar": {
    "D": 0.245,
    "L": 0.165,
-   "W": 0.595
+   "W": 0.605
   },
   "Colombia|DR Congo": {
    "D": 0.215,
-   "W": 0.665,
+   "W": 0.675,
    "L": 0.11499999999999999
   },
   "France|Iraq": {
@@ -60,7 +60,7 @@
   "Czechia|South Africa": {
    "D": 0.235,
    "L": 0.175,
-   "W": 0.605
+   "W": 0.595
   },
   "Portugal|DR Congo": {
    "D": 0.165,
@@ -84,13 +84,8 @@
   },
   "Canada|Bosnia and Herzegovina": {
    "D": 0.265,
-   "W": 0.515,
+   "W": 0.525,
    "L": 0.20500000000000002
-  },
-  "South Korea|Czechia": {
-   "D": 0.11,
-   "W": 0.895,
-   "L": 0.005
   },
   "Jordan|Argentina": {
    "D": 0.11499999999999999,
@@ -113,7 +108,7 @@
    "W": 0.28500000000000003
   },
   "Egypt|Iran": {
-   "D": 0.315,
+   "D": 0.305,
    "L": 0.265,
    "W": 0.425
   },
@@ -134,8 +129,8 @@
   },
   "Norway|France": {
    "D": 0.255,
-   "W": 0.215,
-   "L": 0.525
+   "W": 0.225,
+   "L": 0.535
   },
   "Uruguay|Spain": {
    "W": 0.175,
@@ -189,7 +184,7 @@
   },
   "England|Ghana": {
    "D": 0.165,
-   "L": 0.095,
+   "L": 0.10500000000000001,
    "W": 0.745
   },
   "Portugal|Uzbekistan": {
@@ -205,7 +200,7 @@
   "Argentina|Austria": {
    "D": 0.245,
    "L": 0.165,
-   "W": 0.605
+   "W": 0.615
   },
   "Norway|Senegal": {
    "D": 0.265,
@@ -243,8 +238,8 @@
    "L": 0.065
   },
   "Brazil|Haiti": {
-   "D": 0.065,
-   "L": 0.035,
+   "D": 0.055,
+   "L": 0.045,
    "W": 0.905
   },
   "Germany|Ivory Coast": {
@@ -254,18 +249,18 @@
   },
   "Scotland|Morocco": {
    "D": 0.28500000000000003,
-   "W": 0.215,
+   "W": 0.225,
    "L": 0.495
   },
   "United States|Australia": {
    "W": 0.565,
    "D": 0.245,
-   "L": 0.215
+   "L": 0.20500000000000002
   },
   "Mexico|South Korea": {
-   "D": 0.265,
-   "W": 0.525,
-   "L": 0.225
+   "D": 0.275,
+   "W": 0.505,
+   "L": 0.235
   },
   "Uzbekistan|Colombia": {
    "W": 0.095,
@@ -304,11 +299,11 @@
   },
   "Iran|New Zealand": {
    "D": 0.275,
-   "L": 0.195,
+   "L": 0.2,
    "W": 0.535
   },
   "Belgium|Egypt": {
-   "D": 0.235,
+   "D": 0.245,
    "L": 0.175,
    "W": 0.595
   },
@@ -375,7 +370,7 @@
   "Norway": 0.255,
   "Iraq": 0.005,
   "France": 0.635,
-  "Uruguay": 0.195,
+  "Uruguay": 0.185,
   "Saudi Arabia": 0.015,
   "Spain": 0.785,
   "Cape Verde": 0.005,
@@ -391,22 +386,22 @@
   "Ecuador": 0.225,
   "Curaçao": 0.005,
   "Ivory Coast": 0.135,
-  "United States": 0.39,
+  "United States": 0.395,
   "Türkiye": 0.365,
   "Paraguay": 0.175,
   "Australia": 0.095,
   "Scotland": 0.08499999999999999,
-  "Morocco": 0.215,
+  "Morocco": 0.22,
   "Haiti": 0.005,
   "Brazil": 0.705,
   "Switzerland": 0.555,
   "Qatar": 0.015,
   "Canada": 0.325,
   "Bosnia and Herzegovina": 0.125,
-  "South Africa": 0.015,
-  "Mexico": 0.675,
-  "South Korea": 0.29000000000000004,
-  "Czechia": 0.05
+  "South Africa": 0.005,
+  "Mexico": 0.645,
+  "South Korea": 0.355,
+  "Czechia": 0.025
  },
  "champ": {
   "Iraq": 0.005,
@@ -437,7 +432,7 @@
   "Senegal": 0.006500000000000001,
   "Sweden": 0.0035,
   "Norway": 0.0245,
-  "Mexico": 0.023,
+  "Mexico": 0.022,
   "Morocco": 0.0155,
   "Japan": 0.0165,
   "Ecuador": 0.0085,
@@ -446,9 +441,9 @@
   "Canada": 0.0025,
   "Austria": 0.0025,
   "Uruguay": 0.0095,
-  "United States": 0.0165,
-  "Portugal": 0.1065,
-  "Netherlands": 0.0565,
+  "United States": 0.0175,
+  "Portugal": 0.1105,
+  "Netherlands": 0.0575,
   "Croatia": 0.0075,
   "England": 0.1075,
   "Germany": 0.0555,
@@ -456,6 +451,6 @@
   "Belgium": 0.0225,
   "Argentina": 0.0885,
   "France": 0.17149999999999999,
-  "Spain": 0.17149999999999999
+  "Spain": 0.1765
  }
 }
