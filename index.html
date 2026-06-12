@@ -99,7 +99,7 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 .live-badge.ft{background:#3a3a3a;color:#fff}
 .live-score{font-weight:800;font-size:14px;letter-spacing:.04em}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-#liveBar{display:none;background:var(--pitch);color:var(--led);font-size:11.5px;padding:5px 22px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+#liveBar{display:none;background:var(--pitch);color:var(--led);font-size:11.5px;padding:5px 22px;gap:14px;flex-wrap:wrap;align-items:center}
 #liveBar.has-live{display:flex}
 #liveBar .lb-item{display:flex;gap:7px;align-items:center;font-weight:600}
 #liveBar .lb-score{font-size:13px;font-weight:800}
@@ -168,7 +168,7 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
       <label><input type="checkbox" id="chkElo" checked> rating nudge</label>
       <button class="btn ghost" id="btnKey" title="API key for score fetches on the public web">API key</button>
       <button class="btn ghost" id="btnReset" title="Discard fetched and manual results">Reset to opening</button>
-      <button class="btn refresh" id="btnRefresh">↻ Refresh results<span id="sse-dot" title="Live server connection"></span></button>
+      <button class="btn refresh" id="btnRefresh"><span id="btnRefreshLabel">↻ Refresh results</span><span id="sse-dot" title="Live server connection"></span></button>
     </div>
   </div>
   <div class="keyrow" id="keyRow" style="display:none">
@@ -840,7 +840,7 @@ function mergeFetched(j){
 }
 async function doRefresh(){
   if(S.busy) return;
-  const btn=$("btnRefresh"); btn.disabled=true; btn.textContent="Fetching…";
+  const btn=$("btnRefresh"),lbl=$("btnRefreshLabel"); btn.disabled=true; lbl.textContent="Fetching…";
   try{
     await loadMarket();
     const j=await fetchResults();
@@ -849,7 +849,7 @@ async function doRefresh(){
     S.lastFetch=Date.now();
     if(added.length||fixed.length){
       S.log.unshift({t:Date.now(),items:added.concat(fixed.map(x=>x+" (corrected)"))});
-      btn.textContent="Simulating…";
+      lbl.textContent="Simulating…";
       await runCurrent(true);
       toast("Ingested "+(added.length+fixed.length)+" result(s). Odds updated.");
     }else{
@@ -857,7 +857,7 @@ async function doRefresh(){
       toast("No new final results found — odds unchanged.");
     }
   }catch(e){ if(e.needKey)$("keyRow").style.display="flex"; toast(e.message||String(e),true); }
-  finally{ btn.disabled=false; btn.textContent="↻ Refresh results"; }
+  finally{ btn.disabled=false; lbl.textContent="↻ Refresh results"; }
 }
 $("btnKey").addEventListener("click",()=>{const k=$("keyRow");k.style.display=k.style.display==="none"?"flex":"none";});
 $("keyUse").addEventListener("click",async()=>{
@@ -957,7 +957,7 @@ function renderLiveBar(){
 function renderNext(){
   renderLiveBar();
   const an=S.an.slice().sort((x,y)=>dkey(x.date)-dkey(y.date));
-  for(const f of an) if(!f.played){ // pre-game line for EVERY open fixture; frozen once played
+  for(const f of an) if(!f.played&&!S.results.group[f.key]){ // pre-game line for EVERY open fixture; frozen once played
     const pr=snapPred(f);
     const m=MKT&&MKT.matches&&MKT.matches[f.key];
     if(m) pr.mkt={W:m.W??null,D:m.D??null,L:m.L??null,ts:MKT.ts};
@@ -1175,7 +1175,7 @@ $("chkElo").addEventListener("change",async e=>{S.opts.elo=e.target.checked;S.op
       if(d.scores){
         let changed=false;
         for(const[key,sc]of Object.entries(d.scores)){
-          if((sc.status==="ft")&&sc.ga!=null&&!S.results.group[key]){
+          if((sc.status==="ft")&&sc.ga!=null&&sc.gb!=null&&!S.results.group[key]){
             S.results.group[key]=[sc.ga,sc.gb]; changed=true;
           }
         }

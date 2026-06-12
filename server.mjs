@@ -39,7 +39,7 @@ const ALIAS = {
   "south korea": "South Korea", "cote d'ivoire": "Ivory Coast", "côte d'ivoire": "Ivory Coast",
   "ivory coast": "Ivory Coast", "cabo verde": "Cape Verde", "bosnia": "Bosnia and Herzegovina",
   "bosnia and herzegovina": "Bosnia and Herzegovina", "saudi arabia": "Saudi Arabia", "ir iran": "Iran",
-  "czechia": "Czechia", "czech republic": "Czechia",
+  "czechia": "Czechia",
 };
 const TEAMS = new Set(E.teams);
 function normTeam(n) {
@@ -98,9 +98,9 @@ async function fetchMarket(codeMap) {
   const byEvent = {};
   for (const m of game) (byEvent[m.event_ticker] ??= []).push(m);
   for (const [ev, ms] of Object.entries(byEvent)) {
-    const tk = /KXWCGAME-\d+[A-Z]+?([A-Z]{3})([A-Z]{3})$/.exec(ev);
+    const tk = /KXWCGAME-(\d{2})([A-Z]{3})(\d{2})([A-Z]{3})([A-Z]{3})$/.exec(ev);
     if (!tk) continue;
-    const a = codeMap[tk[1]], b = codeMap[tk[2]];
+    const a = codeMap[tk[4]], b = codeMap[tk[5]];
     const f = E.fixtures.find(x => (x.a === a && x.b === b) || (x.a === b && x.b === a));
     if (!f) continue;
     const imp = {};
@@ -199,9 +199,9 @@ async function syncResults(codeMap, results) {
   for (const m of settled) (byEvent[m.event_ticker] ??= []).push(m);
   let changed = false;
   for (const [ev, ms] of Object.entries(byEvent)) {
-    const codes = /KXWCGAME-\d+[A-Z]+?([A-Z]{3})([A-Z]{3})$/.exec(ev);
+    const codes = /KXWCGAME-(\d{2})([A-Z]{3})(\d{2})([A-Z]{3})([A-Z]{3})$/.exec(ev);
     if (!codes) continue;
-    const a = codeMap[codes[1]], b = codeMap[codes[2]];
+    const a = codeMap[codes[4]], b = codeMap[codes[5]];
     const f = E.fixtures.find(x => (x.a === a && x.b === b) || (x.a === b && x.b === a));
     if (!f || results.group[f.key]) continue;
     const winSide = ms.find(m => m.result === "yes");
@@ -216,7 +216,10 @@ async function syncResults(codeMap, results) {
     changed = true;
     console.log(`  synced ${f.key} -> ${score} (placeholder — edit results.json for real score)`);
   }
-  if (changed) fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2));
+  if (changed) {
+    fs.mkdirSync(path.dirname(RESULTS_FILE), { recursive: true });
+    fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2));
+  }
   return changed;
 }
 
@@ -264,7 +267,13 @@ async function scheduleAnalysis(results) {
   }, 200);
 }
 
-async function refresh() {
+let refreshing = null;
+function refresh() {
+  if (refreshing) return refreshing;
+  refreshing = doRefreshCycle().finally(() => { refreshing = null; });
+  return refreshing;
+}
+async function doRefreshCycle() {
   try {
     const results = loadResults();
     const resultsChanged = JSON.stringify(results) !== JSON.stringify(state.results);
@@ -290,7 +299,7 @@ async function refresh() {
     state.ts      = new Date().toISOString();
 
     // Rebuild market.json so existing index.html fallback still works
-    fs.writeFileSync(path.join(HERE, "market.json"), JSON.stringify(market, null, 1));
+    if (market) fs.writeFileSync(path.join(HERE, "market.json"), JSON.stringify(market, null, 1));
 
     broadcast({ ts: state.ts, scores: state.scores, market: state.market });
 
