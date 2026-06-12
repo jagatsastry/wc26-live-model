@@ -102,6 +102,15 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 #liveBar{display:none;background:var(--pitch);color:var(--led);font-size:11.5px;padding:5px 22px;gap:14px;flex-wrap:wrap;align-items:center}
 #liveBar.has-live{display:flex}
 #liveBar .lb-item{display:flex;gap:7px;align-items:center;font-weight:600}
+.lw-card{background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:8px 13px;min-width:215px;display:flex;flex-direction:column;gap:3px;margin:7px 0}
+.lw-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.lw-upd{opacity:.55;font-size:9.5px}
+.lw-team{display:flex;justify-content:space-between;gap:12px;font-weight:700;font-size:13px}
+.lw-g{font-size:16px;font-weight:800;color:var(--led)}
+.lw-odds{display:flex;gap:7px;align-items:center;font-size:11.5px}
+.lw-lbl{opacity:.6;font-size:9px;text-transform:uppercase;letter-spacing:.08em;width:64px}
+@keyframes lwflash{0%{box-shadow:0 0 0 3px var(--led)}100%{box-shadow:none}}
+.lw-flash{animation:lwflash 1.4s ease-out}
 #liveBar .lb-score{font-size:13px;font-weight:800}
 #sse-dot{width:7px;height:7px;border-radius:50%;background:#aaa;display:inline-block;margin-left:6px;vertical-align:middle}
 #sse-dot.on{background:#4caf50;animation:blink 2s step-end infinite}
@@ -978,17 +987,43 @@ function renderScorecard(){
     ?`Model closer in ${s.modelCloser} of ${s.compared} matches with a market line (${s.scored} scored total) · avg Brier: model ${s.avgBrierModel.toFixed(3)} vs market ${s.avgBrierMarket.toFixed(3)} — lower is better.`
     :`${s.scored} match(es) scored — none with a stored market line yet.`;
 }
+/* ---------- in-play model odds: condition pre-game xG on score + time left ---------- */
+function parseClock(c){const m=/^(\d+)/.exec(String(c||""));return m?+m[1]:0;}
+function inplayOdds(f,sc){
+  const min=sc.status==="ht"?45:Math.min(parseClock(sc.clock),90);
+  const frac=Math.max(0,(90-min)/90);
+  const la=f.xga*frac, lb=f.xgb*frac;
+  const fact=n=>{let r=1;for(let i=2;i<=n;i++)r*=i;return r;};
+  const P=(lam,k)=>Math.exp(-lam)*Math.pow(lam,k)/fact(k);
+  let W=0,D=0,L=0;
+  for(let i=0;i<=8;i++)for(let j=0;j<=8;j++){
+    const p=P(la,i)*P(lb,j), t=(sc.ga+i)-(sc.gb+j);
+    if(t>0)W+=p; else if(t===0)D+=p; else L+=p;
+  }
+  const tot=W+D+L||1; return {W:W/tot,D:D/tot,L:L/tot};
+}
+let lastLiveScores={};
 function renderLiveBar(){
   const bar=$("liveBar");
   const live=Object.entries(LIVE).filter(([,s])=>s.status==="live"||s.status==="ht");
-  if(!live.length){bar.classList.remove("has-live");return;}
+  if(!live.length){bar.classList.remove("has-live");bar.innerHTML="";lastLiveScores={};return;}
   bar.classList.add("has-live");
-  bar.innerHTML=`<span style="opacity:.6;font-size:10px;letter-spacing:.1em;text-transform:uppercase">Live</span>`+
-    live.map(([key,s])=>{
-      const f=E.fixtures.find(x=>x.key===key); if(!f) return "";
-      const badge=s.status==="ht"?`<span class="live-badge ht">HT</span>`:`<span class="live-badge live">${s.clock}</span>`;
-      return `<span class="lb-item">${badge} ${f.a} <span class="lb-score">${s.ga}–${s.gb}</span> ${f.b}</span>`;
-    }).join("")+`<span style="opacity:.5;margin-left:auto;font-size:10px">${MKT?new Date(MKT.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" market":""}</span>`;
+  bar.innerHTML=live.map(([key,s])=>{
+    const f=(S.an&&S.an.find(x=>x.key===key))||E.fixtures.find(x=>x.key===key);
+    if(!f) return "";
+    const ip=f.xga!=null?inplayOdds(f,s):null;
+    const m=MKT&&MKT.matches&&MKT.matches[key];
+    const badge=s.status==="ht"?`<span class="live-badge ht">HT</span>`:`<span class="live-badge live">● ${s.clock||""}</span>`;
+    const sk=`${s.ga}-${s.gb}`, flash=lastLiveScores[key]!==undefined&&lastLiveScores[key]!==sk?" lw-flash":"";
+    lastLiveScores[key]=sk;
+    return `<div class="lw-card${flash}">
+      <div class="lw-head">${badge}<span class="lw-upd">live · ${new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</span></div>
+      <div class="lw-team"><span>${f.a}</span><b class="lw-g">${s.ga}</b></div>
+      <div class="lw-team"><span>${f.b}</span><b class="lw-g">${s.gb}</b></div>
+      <div class="lw-odds"><span class="lw-lbl">model live</span><span class="num">${ip?fmt1x2(ip):"—"}</span></div>
+      <div class="lw-odds"><span class="lw-lbl">market</span><span class="num">${m?fmt1x2(m):`<span class="pp">n/a</span>`}</span></div>
+    </div>`;
+  }).join("");
 }
 function renderNext(){
   renderLiveBar();
