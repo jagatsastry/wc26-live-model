@@ -40,7 +40,8 @@ const ALIAS = {
   "south korea": "South Korea", "cote d'ivoire": "Ivory Coast", "côte d'ivoire": "Ivory Coast",
   "ivory coast": "Ivory Coast", "cabo verde": "Cape Verde", "bosnia": "Bosnia and Herzegovina",
   "bosnia and herzegovina": "Bosnia and Herzegovina", "saudi arabia": "Saudi Arabia", "ir iran": "Iran",
-  "czechia": "Czechia",
+  "czechia": "Czechia", "bosnia-herzegovina": "Bosnia and Herzegovina",
+  "bosnia herzegovina": "Bosnia and Herzegovina",
 };
 const TEAMS = new Set(E.teams);
 function normTeam(n) {
