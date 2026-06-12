@@ -93,6 +93,18 @@ table.st{width:100%;border-collapse:collapse;background:var(--card);border:1px s
 .st .sep{color:var(--line);padding:0 7px}
 .mhi{color:var(--up);background:#E2F2E7;border-radius:4px;padding:0 3px}
 .mlo{color:var(--dn);background:#F9E6DF;border-radius:4px;padding:0 3px}
+.live-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;letter-spacing:.04em;border-radius:5px;padding:1px 6px}
+.live-badge.live{background:#D32F0F;color:#fff}.live-badge.live::before{content:"●";font-size:8px;animation:blink 1s step-end infinite}
+.live-badge.ht{background:#E8A020;color:#fff}
+.live-badge.ft{background:#3a3a3a;color:#fff}
+.live-score{font-weight:800;font-size:14px;letter-spacing:.04em}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+#liveBar{display:none;background:var(--pitch);color:var(--led);font-size:11.5px;padding:5px 22px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+#liveBar.has-live{display:flex}
+#liveBar .lb-item{display:flex;gap:7px;align-items:center;font-weight:600}
+#liveBar .lb-score{font-size:13px;font-weight:800}
+#sse-dot{width:7px;height:7px;border-radius:50%;background:#aaa;display:inline-block;margin-left:6px;vertical-align:middle}
+#sse-dot.on{background:#4caf50;animation:blink 2s step-end infinite}
 .st td.quiet{text-align:left;color:var(--mut);font-weight:400}
 .stwrap{overflow-x:auto}
 .duo{display:grid;grid-template-columns:1fr;gap:8px}
@@ -144,6 +156,7 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
 </style>
 </head>
 <body>
+<div id="liveBar"></div>
 <div class="wrap">
 <header class="mast">
   <div class="eyebrow">FIFA World Cup 26 · United States · Mexico · Canada</div>
@@ -155,7 +168,7 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
       <label><input type="checkbox" id="chkElo" checked> rating nudge</label>
       <button class="btn ghost" id="btnKey" title="API key for score fetches on the public web">API key</button>
       <button class="btn ghost" id="btnReset" title="Discard fetched and manual results">Reset to opening</button>
-      <button class="btn refresh" id="btnRefresh">↻ Refresh results</button>
+      <button class="btn refresh" id="btnRefresh">↻ Refresh results<span id="sse-dot" title="Live server connection"></span></button>
     </div>
   </div>
   <div class="keyrow" id="keyRow" style="display:none">
@@ -922,11 +935,27 @@ const oddsCell=(p,ref)=>{ // ref = model line; win sides ≥8pp apart get green 
   };
   return `<td class="num">${c(p.W,ref.W)}<span class="sep">·</span>${c(p.D,null)}<span class="sep">·</span>${c(p.L,ref.L)}</td>`;
 };
-let anOpenMap=null, MKT=null;
-async function loadMarket(){ // Kalshi blocks browser CORS; tools/edge_finder.mjs writes this same-origin snapshot
-  try{const r=await fetch("market.json",{cache:"no-store"});if(r.ok) MKT=await r.json();}catch(e){}
+let anOpenMap=null, MKT=null, LIVE={};
+async function loadMarket(){
+  // Try the live server first; fall back to the static market.json snapshot (GitHub Pages / offline)
+  for(const url of ["/api/market","market.json"]){
+    try{const r=await fetch(url,{cache:"no-store"});if(r.ok){MKT=await r.json();return;}}catch(e){}
+  }
+}
+function renderLiveBar(){
+  const bar=$("liveBar");
+  const live=Object.entries(LIVE).filter(([,s])=>s.status==="live"||s.status==="ht");
+  if(!live.length){bar.classList.remove("has-live");return;}
+  bar.classList.add("has-live");
+  bar.innerHTML=`<span style="opacity:.6;font-size:10px;letter-spacing:.1em;text-transform:uppercase">Live</span>`+
+    live.map(([key,s])=>{
+      const f=E.fixtures.find(x=>x.key===key); if(!f) return "";
+      const badge=s.status==="ht"?`<span class="live-badge ht">HT</span>`:`<span class="live-badge live">${s.clock}</span>`;
+      return `<span class="lb-item">${badge} ${f.a} <span class="lb-score">${s.ga}–${s.gb}</span> ${f.b}</span>`;
+    }).join("")+`<span style="opacity:.5;margin-left:auto;font-size:10px">${MKT?new Date(MKT.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})+" market":""}</span>`;
 }
 function renderNext(){
+  renderLiveBar();
   const an=S.an.slice().sort((x,y)=>dkey(x.date)-dkey(y.date));
   for(const f of an) if(!f.played){ // pre-game line for EVERY open fixture; frozen once played
     const pr=snapPred(f);
@@ -938,8 +967,10 @@ function renderNext(){
   if(MKT) $("mktWhen").textContent="as of "+new Date(MKT.ts).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   const up=an.filter(f=>!f.played).slice(0,5);
   const done=an.filter(f=>f.played&&S.preds[f.key]).slice(-5).reverse(); // most recent first
+  const liveBadge=key=>{const s=LIVE[key];if(!s||s.status==="pre"||s.status==="ft")return "";
+    return s.status==="ht"?` <span class="live-badge ht">HT ${s.ga}–${s.gb}</span>`:` <span class="live-badge live">${s.clock} ${s.ga}–${s.gb}</span>`;};
   const lead=f=>{const p=S.preds[f.key];
-    return `<td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}</td>`+
+    return `<td style="font-weight:400">${p.date}</td><td class="lft" style="font-weight:600">${p.a} v ${p.b}${liveBadge(f.key)}</td>`+
       oddsCell(anOpenMap&&anOpenMap[f.key])+oddsCell(p)+oddsCell(p.mkt,p);};
   $("nextm").innerHTML=
     `<tr><th>Date</th><th>Match</th><th>Model opening</th><th>Model now</th><th>Market</th><th>Exp. goals</th></tr>`+
@@ -1123,6 +1154,35 @@ $("chkElo").addEventListener("change",async e=>{S.opts.elo=e.target.checked;S.op
   $("selN").value=String(S.opts.nsim); $("chkElo").checked=!!S.opts.elo;
   $("subline").textContent="Monte Carlo tournament simulator · "+new Date().toLocaleDateString([],{month:"long",day:"numeric",year:"numeric"});
   await runCurrent(!!S.prev);
+  // SSE live updates — only available when running the local server
+  try{
+    const es=new EventSource("/sse");
+    const dot=$("sse-dot");
+    es.onopen=()=>{if(dot)dot.className="on";};
+    es.onerror=()=>{if(dot)dot.className="";};
+    es.onmessage=async e=>{
+      const d=JSON.parse(e.data);
+      if(d.market){MKT=d.market;}
+      if(d.scores){LIVE=d.scores;}
+      if(d.analysis&&d.analysis.an){
+        // merge server analysis into S.an and anOpenMap
+        S.an=d.analysis.an;
+        if(d.analysis.anOpen) anOpenMap=d.analysis.anOpen;
+      }
+      renderLiveBar();
+      renderNext();
+      // auto-apply newly settled scores from server sync
+      if(d.scores){
+        let changed=false;
+        for(const[key,sc]of Object.entries(d.scores)){
+          if((sc.status==="ft")&&sc.ga!=null&&!S.results.group[key]){
+            S.results.group[key]=[sc.ga,sc.gb]; changed=true;
+          }
+        }
+        if(changed) await runCurrent(true);
+      }
+    };
+  }catch(e){}
 })();
 </script>
 </body>
