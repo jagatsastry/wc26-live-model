@@ -200,6 +200,12 @@ footer h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var
 </section>
 
 <section>
+  <h2>Model vs market <span class="note">pre-game lines frozen at kickoff · Brier score = squared error vs actual outcome · lower is better</span></h2>
+  <div class="quiet" id="scoresum" style="margin:4px 0 8px;font-size:12px"></div>
+  <div class="stwrap"><table class="st" id="scorecard"></table></div>
+</section>
+
+<section>
   <div class="cols">
     <div>
       <h2>Champion probabilities <span class="note">top 16 · Δ vs previous run · <i>open</i> = pre-tournament</span></h2>
@@ -935,12 +941,42 @@ const oddsCell=(p,ref)=>{ // ref = model line; win sides ≥8pp apart get green 
   };
   return `<td class="num">${c(p.W,ref.W)}<span class="sep">·</span>${c(p.D,null)}<span class="sep">·</span>${c(p.L,ref.L)}</td>`;
 };
-let anOpenMap=null, MKT=null, LIVE={};
+let anOpenMap=null, MKT=null, LIVE={}, SCORECARD=null;
 async function loadMarket(){
   // Try the live server first; fall back to the static market.json snapshot (GitHub Pages / offline)
   for(const url of ["/api/market","market.json"]){
     try{const r=await fetch(url,{cache:"no-store"});if(r.ok){MKT=await r.json();return;}}catch(e){}
   }
+}
+async function loadScorecard(){
+  for(const url of ["/api/scorecard","scorecard.json"]){
+    try{const r=await fetch(url,{cache:"no-store"});if(r.ok){const j=await r.json();if(j&&j.rows){SCORECARD=j;return;}}}catch(e){}
+  }
+}
+function renderScorecard(){
+  const el=$("scorecard"); if(!el) return;
+  if(!SCORECARD||!SCORECARD.rows.length){
+    el.innerHTML=`<tr><td class="quiet">No scored matches yet — pre-game lines are logged automatically while the local server runs.</td></tr>`;
+    $("scoresum").textContent=""; return;
+  }
+  const rows=SCORECARD.rows.slice().sort((x,y)=>dkey(x.date)-dkey(y.date));
+  el.innerHTML=`<tr><th>Date</th><th>Match</th><th>Model pre-game</th><th>Market pre-game</th><th>Result</th><th>Brier model · market</th><th>Closer</th></tr>`+
+    rows.map(r=>{
+      const [a,b]=r.key.split("|");
+      const chip=r.closer==null?`<span class="pp">no market line</span>`
+        :r.closer==="tie"?`<span class="dchip">tie</span>`
+        :`<span class="dchip ${r.closer==="model"?"up":"dn"}">${r.closer}</span>`;
+      return `<tr><td>${r.date}</td><td>${a} v ${b}</td>`+
+        `<td class="num">${fmt1x2(r.model)}</td>`+
+        `<td class="num">${r.market?fmt1x2(r.market):`<span class="pp">n/a</span>`}</td>`+
+        `<td class="num" style="font-weight:700">${r.result[0]}–${r.result[1]}</td>`+
+        `<td class="num">${r.brierModel.toFixed(3)} · ${r.brierMarket==null?"—":r.brierMarket.toFixed(3)}</td>`+
+        `<td>${chip}</td></tr>`;
+    }).join("");
+  const s=SCORECARD.summary;
+  $("scoresum").textContent=s.compared
+    ?`Model closer in ${s.modelCloser} of ${s.compared} matches with a market line (${s.scored} scored total) · avg Brier: model ${s.avgBrierModel.toFixed(3)} vs market ${s.avgBrierMarket.toFixed(3)} — lower is better.`
+    :`${s.scored} match(es) scored — none with a stored market line yet.`;
 }
 function renderLiveBar(){
   const bar=$("liveBar");
@@ -1154,6 +1190,7 @@ $("chkElo").addEventListener("change",async e=>{S.opts.elo=e.target.checked;S.op
   $("selN").value=String(S.opts.nsim); $("chkElo").checked=!!S.opts.elo;
   $("subline").textContent="Monte Carlo tournament simulator · "+new Date().toLocaleDateString([],{month:"long",day:"numeric",year:"numeric"});
   await runCurrent(!!S.prev);
+  loadScorecard().then(renderScorecard);
   // SSE live updates — only available when running the local server
   try{
     const es=new EventSource("/sse");
@@ -1164,6 +1201,7 @@ $("chkElo").addEventListener("change",async e=>{S.opts.elo=e.target.checked;S.op
       const d=JSON.parse(e.data);
       if(d.market){MKT=d.market;}
       if(d.scores){LIVE=d.scores;}
+      if(d.scorecard){SCORECARD=d.scorecard;renderScorecard();}
       if(d.analysis&&d.analysis.an){
         // merge server analysis into S.an and anOpenMap
         S.an=d.analysis.an;

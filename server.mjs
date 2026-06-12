@@ -18,6 +18,7 @@ const PORT   = process.env.PORT || 3000;
 const KALSHI = "https://api.elections.kalshi.com/trade-api/v2";
 const ESPN   = "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard";
 const RESULTS_FILE = path.join(HERE, "tools", "data", "results.json");
+const PREDLOG_FILE = path.join(HERE, "tools", "data", "predlog.json");
 
 /* ---------- load model engine from index.html ---------- */
 function loadEngine() {
@@ -230,6 +231,7 @@ let state = {
   analysis: null,
   results:  null,
   codeMap:  null,
+  scorecard: null,
   ts:       null,
   error:    null,
 };
@@ -242,7 +244,7 @@ function broadcast(partial) {
 }
 
 function statePayload() {
-  return { ts: state.ts, scores: state.scores, market: state.market, analysis: state.analysis ? {
+  return { ts: state.ts, scores: state.scores, market: state.market, scorecard: state.scorecard, analysis: state.analysis ? {
     an: state.analysis.an, anOpen: state.analysis.anOpen,
     champ: state.analysis.out?.champ, group: state.analysis.out?.group,
   } : null };
@@ -253,6 +255,80 @@ function loadResults() {
   catch { return { group: { ...DATA.fixedResults }, ko: [] }; }
 }
 
+/* ---------- pre-match prediction log & scorecard ---------- */
+function loadPredlog() {
+  try { return JSON.parse(fs.readFileSync(PREDLOG_FILE, "utf8")); }
+  catch { return {}; }
+}
+function savePredlog(log) {
+  fs.mkdirSync(path.dirname(PREDLOG_FILE), { recursive: true });
+  fs.writeFileSync(PREDLOG_FILE, JSON.stringify(log, null, 2));
+}
+
+// Called each refresh: keep latest model+market line per upcoming fixture,
+// freeze the snapshot at kickoff, attach the result once known.
+function updatePredlog() {
+  if (!state.analysis?.an) return;
+  const log = loadPredlog();
+  let changed = false;
+  for (const f of state.analysis.an) {
+    const status = state.scores[f.key]?.status;
+    const result = state.results?.group?.[f.key];
+    const started = !!result || (status && status !== "pre");
+    const e = log[f.key] ?? (log[f.key] = { date: f.date, model: null, modelTs: null, market: null, marketTs: null, frozen: false, result: null });
+    if (!e.frozen && !started && !f.played) {
+      const now = new Date().toISOString();
+      e.model = { W: +f.W.toFixed(4), D: +f.D.toFixed(4), L: +f.L.toFixed(4) };
+      e.modelTs = now;
+      const m = state.market?.matches?.[f.key];
+      if (m && m.W != null && m.D != null && m.L != null) {
+        e.market = { W: m.W, D: m.D, L: m.L }; e.marketTs = now;
+      }
+      changed = true;
+    }
+    if (!e.frozen && started) { e.frozen = true; changed = true; }
+    if (e.frozen && result && !e.result) { e.result = result; changed = true; }
+  }
+  if (changed) {
+    savePredlog(log);
+    state.scorecard = buildScorecard(log);
+    fs.writeFileSync(path.join(HERE, "scorecard.json"), JSON.stringify(state.scorecard, null, 1));
+  } else if (!state.scorecard) {
+    state.scorecard = buildScorecard(log);
+  }
+}
+
+function brier(p, idx) { // p={W,D,L} normalized; idx = actual outcome
+  const t = (p.W + p.D + p.L) || 1; // strip market vig / sim noise
+  let s = 0;
+  for (const o of ["W", "D", "L"]) s += ((p[o] / t) - (o === idx ? 1 : 0)) ** 2;
+  return s;
+}
+
+function buildScorecard(log) {
+  log = log ?? loadPredlog();
+  const rows = [];
+  for (const [key, e] of Object.entries(log)) {
+    if (!e.result || !e.model) continue;
+    const [ga, gb] = e.result;
+    const outcome = ga > gb ? "W" : ga === gb ? "D" : "L";
+    const bModel = brier(e.model, outcome);
+    const bMarket = e.market ? brier(e.market, outcome) : null;
+    rows.push({ key, date: e.date, model: e.model, market: e.market, result: e.result,
+      brierModel: +bModel.toFixed(4), brierMarket: bMarket == null ? null : +bMarket.toFixed(4),
+      closer: bMarket == null ? null : (bModel < bMarket ? "model" : bMarket < bModel ? "market" : "tie") });
+  }
+  const cmp = rows.filter(r => r.closer);
+  const avg = a => a.length ? +(a.reduce((x, y) => x + y, 0) / a.length).toFixed(4) : null;
+  return { ts: new Date().toISOString(), rows, summary: {
+    scored: rows.length, compared: cmp.length,
+    modelCloser: cmp.filter(r => r.closer === "model").length,
+    marketCloser: cmp.filter(r => r.closer === "market").length,
+    avgBrierModel: avg(cmp.map(r => r.brierModel)),
+    avgBrierMarket: avg(cmp.map(r => r.brierMarket)),
+  } };
+}
+
 let analysisTimer = null;
 async function scheduleAnalysis(results) {
   clearTimeout(analysisTimer);
@@ -261,6 +337,7 @@ async function scheduleAnalysis(results) {
     try {
       state.analysis = await runAnalysis(results);
       state.ts = new Date().toISOString();
+      try { updatePredlog(); } catch (e) { console.error("Predlog error:", e.message); }
       broadcast();
       console.log("Analysis done.");
     } catch (e) { console.error("Analysis error:", e.message); }
@@ -301,7 +378,9 @@ async function doRefreshCycle() {
     // Rebuild market.json so existing index.html fallback still works
     if (market) fs.writeFileSync(path.join(HERE, "market.json"), JSON.stringify(market, null, 1));
 
-    broadcast({ ts: state.ts, scores: state.scores, market: state.market });
+    try { updatePredlog(); } catch (e) { console.error("Predlog error:", e.message); }
+
+    broadcast({ ts: state.ts, scores: state.scores, market: state.market, scorecard: state.scorecard });
 
     if (resultsChanged || synced || !state.analysis) await scheduleAnalysis(state.results);
 
@@ -341,6 +420,8 @@ app.get("/api/analysis", (_, res) => res.json(state.analysis ? {
   an: state.analysis.an, anOpen: state.analysis.anOpen,
   champ: state.analysis.out?.champ, group: state.analysis.out?.group,
 } : null));
+
+app.get("/api/scorecard", (_, res) => res.json(state.scorecard ?? buildScorecard()));
 
 app.get("/api/status", (_, res) => res.json({
   ts: state.ts,

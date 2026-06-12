@@ -1,0 +1,51 @@
+{
+ "ts": "2026-06-12T05:16:07.285Z",
+ "rows": [
+  {
+   "key": "Mexico|South Africa",
+   "date": "Jun 11",
+   "model": {
+    "W": 0.6264,
+    "D": 0.2041,
+    "L": 0.1695
+   },
+   "market": null,
+   "result": [
+    2,
+    0
+   ],
+   "brierModel": 0.21,
+   "brierMarket": null,
+   "closer": null
+  },
+  {
+   "key": "South Korea|Czechia",
+   "date": "Jun 11",
+   "model": {
+    "W": 0.3827,
+    "D": 0.2504,
+    "L": 0.3669
+   },
+   "market": {
+    "W": 0.375,
+    "D": 0.315,
+    "L": 0.325
+   },
+   "result": [
+    2,
+    1
+   ],
+   "brierModel": 0.5784,
+   "brierMarket": 0.5964,
+   "closer": "model"
+  }
+ ],
+ "summary": {
+  "scored": 2,
+  "compared": 1,
+  "modelCloser": 1,
+  "marketCloser": 0,
+  "avgBrierModel": 0.5784,
+  "avgBrierMarket": 0.5964
+ }
+}

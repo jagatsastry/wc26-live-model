@@ -1,0 +1,1228 @@
+{
+  "Mexico|South Africa": {
+    "date": "Jun 11",
+    "model": {
+      "W": 0.6264,
+      "D": 0.2041,
+      "L": 0.1695
+    },
+    "modelTs": "2026-06-11T00:00:00.000Z",
+    "market": null,
+    "marketTs": null,
+    "frozen": true,
+    "result": [
+      2,
+      0
+    ]
+  },
+  "South Korea|Czechia": {
+    "date": "Jun 11",
+    "model": {
+      "W": 0.3827,
+      "D": 0.2504,
+      "L": 0.3669
+    },
+    "modelTs": "2026-06-11T23:15:18.570Z",
+    "market": {
+      "W": 0.375,
+      "D": 0.315,
+      "L": 0.325
+    },
+    "marketTs": "2026-06-11T23:15:18.570Z",
+    "frozen": true,
+    "result": [
+      2,
+      1
+    ]
+  },
+  "Mexico|South Korea": {
+    "date": "Jun 18",
+    "model": {
+      "W": 0.533,
+      "D": 0.2311,
+      "L": 0.2359
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.495,
+      "D": 0.275,
+      "L": 0.235
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Czechia|South Africa": {
+    "date": "Jun 18",
+    "model": {
+      "W": 0.453,
+      "D": 0.2454,
+      "L": 0.3016
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.595,
+      "D": 0.235,
+      "L": 0.175
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Czechia|Mexico": {
+    "date": "Jun 24",
+    "model": {
+      "W": 0.2055,
+      "D": 0.2205,
+      "L": 0.5741
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.195,
+      "D": 0.255,
+      "L": 0.535
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "South Africa|South Korea": {
+    "date": "Jun 24",
+    "model": {
+      "W": 0.2668,
+      "D": 0.2391,
+      "L": 0.4941
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.155,
+      "D": 0.235,
+      "L": 0.625
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Canada|Bosnia and Herzegovina": {
+    "date": "Jun 12",
+    "model": {
+      "W": 0.5608,
+      "D": 0.2241,
+      "L": 0.2151
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.525,
+      "D": 0.265,
+      "L": 0.20500000000000002
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Qatar|Switzerland": {
+    "date": "Jun 13",
+    "model": {
+      "W": 0.2441,
+      "D": 0.2334,
+      "L": 0.5225
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.065,
+      "D": 0.135,
+      "L": 0.805
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Canada|Qatar": {
+    "date": "Jun 18",
+    "model": {
+      "W": 0.6021,
+      "D": 0.2121,
+      "L": 0.1858
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.745,
+      "D": 0.175,
+      "L": 0.08499999999999999
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Switzerland|Bosnia and Herzegovina": {
+    "date": "Jun 18",
+    "model": {
+      "W": 0.4807,
+      "D": 0.2414,
+      "L": 0.2778
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.615,
+      "D": 0.235,
+      "L": 0.165
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Switzerland|Canada": {
+    "date": "Jun 24",
+    "model": {
+      "W": 0.302,
+      "D": 0.2455,
+      "L": 0.4525
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.445,
+      "D": 0.275,
+      "L": 0.275
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Bosnia and Herzegovina|Qatar": {
+    "date": "Jun 24",
+    "model": {
+      "W": 0.4148,
+      "D": 0.2491,
+      "L": 0.3361
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.605,
+      "D": 0.245,
+      "L": 0.165
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Brazil|Morocco": {
+    "date": "Jun 13",
+    "model": {
+      "W": 0.4932,
+      "D": 0.2393,
+      "L": 0.2675
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.585,
+      "D": 0.245,
+      "L": 0.175
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Haiti|Scotland": {
+    "date": "Jun 13",
+    "model": {
+      "W": 0.2218,
+      "D": 0.2265,
+      "L": 0.5517
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.155,
+      "D": 0.215,
+      "L": 0.615
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Brazil|Haiti": {
+    "date": "Jun 19",
+    "model": {
+      "W": 0.7771,
+      "D": 0.1403,
+      "L": 0.0826
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.905,
+      "D": 0.060000000000000005,
+      "L": 0.045
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Scotland|Morocco": {
+    "date": "Jun 19",
+    "model": {
+      "W": 0.2641,
+      "D": 0.2385,
+      "L": 0.4974
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.225,
+      "D": 0.28500000000000003,
+      "L": 0.495
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Scotland|Brazil": {
+    "date": "Jun 24",
+    "model": {
+      "W": 0.1754,
+      "D": 0.2071,
+      "L": 0.6176
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.14500000000000002,
+      "D": 0.185,
+      "L": 0.665
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Morocco|Haiti": {
+    "date": "Jun 24",
+    "model": {
+      "W": 0.6731,
+      "D": 0.1869,
+      "L": 0.14
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.735,
+      "D": 0.165,
+      "L": 0.095
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "United States|Paraguay": {
+    "date": "Jun 12",
+    "model": {
+      "W": 0.5066,
+      "D": 0.2368,
+      "L": 0.2567
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.485,
+      "D": 0.275,
+      "L": 0.225
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Australia|Türkiye": {
+    "date": "Jun 13",
+    "model": {
+      "W": 0.3323,
+      "D": 0.2488,
+      "L": 0.4189
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.175,
+      "D": 0.255,
+      "L": 0.575
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "United States|Australia": {
+    "date": "Jun 19",
+    "model": {
+      "W": 0.54,
+      "D": 0.2294,
+      "L": 0.2306
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.565,
+      "D": 0.245,
+      "L": 0.20500000000000002
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Türkiye|Paraguay": {
+    "date": "Jun 19",
+    "model": {
+      "W": 0.3866,
+      "D": 0.2503,
+      "L": 0.363
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.435,
+      "D": 0.295,
+      "L": 0.275
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Türkiye|United States": {
+    "date": "Jun 25",
+    "model": {
+      "W": 0.2668,
+      "D": 0.2391,
+      "L": 0.494
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.375,
+      "D": 0.265,
+      "L": 0.375
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Paraguay|Australia": {
+    "date": "Jun 25",
+    "model": {
+      "W": 0.4067,
+      "D": 0.2496,
+      "L": 0.3437
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.455,
+      "D": 0.28500000000000003,
+      "L": 0.255
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Germany|Curaçao": {
+    "date": "Jun 14",
+    "model": {
+      "W": 0.696,
+      "D": 0.1776,
+      "L": 0.1264
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.935,
+      "D": 0.045,
+      "L": 0.025
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Ivory Coast|Ecuador": {
+    "date": "Jun 14",
+    "model": {
+      "W": 0.2709,
+      "D": 0.24,
+      "L": 0.4891
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.275,
+      "D": 0.335,
+      "L": 0.405
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Germany|Ivory Coast": {
+    "date": "Jun 20",
+    "model": {
+      "W": 0.5517,
+      "D": 0.2265,
+      "L": 0.2218
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.635,
+      "D": 0.215,
+      "L": 0.165
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Ecuador|Curaçao": {
+    "date": "Jun 20",
+    "model": {
+      "W": 0.6377,
+      "D": 0.2001,
+      "L": 0.1622
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.805,
+      "D": 0.125,
+      "L": 0.065
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Ecuador|Germany": {
+    "date": "Jun 25",
+    "model": {
+      "W": 0.3174,
+      "D": 0.2474,
+      "L": 0.4352
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.20500000000000002,
+      "D": 0.245,
+      "L": 0.555
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Curaçao|Ivory Coast": {
+    "date": "Jun 25",
+    "model": {
+      "W": 0.2441,
+      "D": 0.2334,
+      "L": 0.5225
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.065,
+      "D": 0.135,
+      "L": 0.795
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Netherlands|Japan": {
+    "date": "Jun 14",
+    "model": {
+      "W": 0.4724,
+      "D": 0.2428,
+      "L": 0.2848
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.485,
+      "D": 0.265,
+      "L": 0.255
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Sweden|Tunisia": {
+    "date": "Jun 14",
+    "model": {
+      "W": 0.3866,
+      "D": 0.2503,
+      "L": 0.363
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.515,
+      "D": 0.275,
+      "L": 0.215
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Netherlands|Sweden": {
+    "date": "Jun 20",
+    "model": {
+      "W": 0.6013,
+      "D": 0.2123,
+      "L": 0.1864
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.595,
+      "D": 0.225,
+      "L": 0.185
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Tunisia|Japan": {
+    "date": "Jun 20",
+    "model": {
+      "W": 0.2506,
+      "D": 0.2352,
+      "L": 0.5141
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.165,
+      "D": 0.265,
+      "L": 0.585
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Tunisia|Netherlands": {
+    "date": "Jun 25",
+    "model": {
+      "W": 0.1781,
+      "D": 0.2084,
+      "L": 0.6135
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.135,
+      "D": 0.20500000000000002,
+      "L": 0.665
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Japan|Sweden": {
+    "date": "Jun 25",
+    "model": {
+      "W": 0.5016,
+      "D": 0.2377,
+      "L": 0.2607
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.46499999999999997,
+      "D": 0.265,
+      "L": 0.265
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Belgium|Egypt": {
+    "date": "Jun 15",
+    "model": {
+      "W": 0.4974,
+      "D": 0.2385,
+      "L": 0.2641
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.595,
+      "D": 0.235,
+      "L": 0.165
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Iran|New Zealand": {
+    "date": "Jun 15",
+    "model": {
+      "W": 0.5016,
+      "D": 0.2377,
+      "L": 0.2607
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.535,
+      "D": 0.275,
+      "L": 0.2
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Belgium|Iran": {
+    "date": "Jun 21",
+    "model": {
+      "W": 0.4724,
+      "D": 0.2428,
+      "L": 0.2848
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.695,
+      "D": 0.195,
+      "L": 0.125
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "New Zealand|Egypt": {
+    "date": "Jun 21",
+    "model": {
+      "W": 0.2813,
+      "D": 0.2421,
+      "L": 0.4766
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.195,
+      "D": 0.245,
+      "L": 0.555
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "New Zealand|Belgium": {
+    "date": "Jun 26",
+    "model": {
+      "W": 0.1864,
+      "D": 0.2123,
+      "L": 0.6013
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.08499999999999999,
+      "D": 0.155,
+      "L": 0.775
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Egypt|Iran": {
+    "date": "Jun 26",
+    "model": {
+      "W": 0.3514,
+      "D": 0.25,
+      "L": 0.3986
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.425,
+      "D": 0.305,
+      "L": 0.265
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Spain|Cape Verde": {
+    "date": "Jun 15",
+    "model": {
+      "W": 0.8374,
+      "D": 0.1083,
+      "L": 0.0544
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.905,
+      "D": 0.065,
+      "L": 0.035
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Saudi Arabia|Uruguay": {
+    "date": "Jun 15",
+    "model": {
+      "W": 0.192,
+      "D": 0.2149,
+      "L": 0.5931
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.11499999999999999,
+      "D": 0.20500000000000002,
+      "L": 0.675
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Spain|Saudi Arabia": {
+    "date": "Jun 21",
+    "model": {
+      "W": 0.8055,
+      "D": 0.1257,
+      "L": 0.0688
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.885,
+      "D": 0.08499999999999999,
+      "L": 0.035
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Uruguay|Cape Verde": {
+    "date": "Jun 21",
+    "model": {
+      "W": 0.6377,
+      "D": 0.2001,
+      "L": 0.1622
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.695,
+      "D": 0.195,
+      "L": 0.11499999999999999
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Uruguay|Spain": {
+    "date": "Jun 26",
+    "model": {
+      "W": 0.1781,
+      "D": 0.2084,
+      "L": 0.6135
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.175,
+      "D": 0.235,
+      "L": 0.585
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Cape Verde|Saudi Arabia": {
+    "date": "Jun 26",
+    "model": {
+      "W": 0.3323,
+      "D": 0.2488,
+      "L": 0.4189
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.385,
+      "D": 0.28500000000000003,
+      "L": 0.345
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "France|Senegal": {
+    "date": "Jun 16",
+    "model": {
+      "W": 0.6216,
+      "D": 0.2057,
+      "L": 0.1727
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.675,
+      "D": 0.215,
+      "L": 0.125
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Iraq|Norway": {
+    "date": "Jun 16",
+    "model": {
+      "W": 0.2007,
+      "D": 0.2186,
+      "L": 0.5807
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.065,
+      "D": 0.125,
+      "L": 0.815
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "France|Iraq": {
+    "date": "Jun 22",
+    "model": {
+      "W": 0.7432,
+      "D": 0.1567,
+      "L": 0.1001
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.875,
+      "D": 0.095,
+      "L": 0.035
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Norway|Senegal": {
+    "date": "Jun 22",
+    "model": {
+      "W": 0.4475,
+      "D": 0.2461,
+      "L": 0.3064
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.455,
+      "D": 0.265,
+      "L": 0.28500000000000003
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Norway|France": {
+    "date": "Jun 26",
+    "model": {
+      "W": 0.2249,
+      "D": 0.2275,
+      "L": 0.5475
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.225,
+      "D": 0.255,
+      "L": 0.535
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Senegal|Iraq": {
+    "date": "Jun 26",
+    "model": {
+      "W": 0.5058,
+      "D": 0.2369,
+      "L": 0.2573
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.7,
+      "D": 0.195,
+      "L": 0.10500000000000001
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Argentina|Algeria": {
+    "date": "Jun 16",
+    "model": {
+      "W": 0.7326,
+      "D": 0.1616,
+      "L": 0.1058
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.705,
+      "D": 0.20500000000000002,
+      "L": 0.10500000000000001
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Austria|Jordan": {
+    "date": "Jun 16",
+    "model": {
+      "W": 0.5267,
+      "D": 0.2325,
+      "L": 0.2408
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.735,
+      "D": 0.165,
+      "L": 0.10500000000000001
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Argentina|Austria": {
+    "date": "Jun 22",
+    "model": {
+      "W": 0.6653,
+      "D": 0.1899,
+      "L": 0.1448
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.615,
+      "D": 0.245,
+      "L": 0.165
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Jordan|Algeria": {
+    "date": "Jun 22",
+    "model": {
+      "W": 0.3027,
+      "D": 0.2456,
+      "L": 0.4517
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.14500000000000002,
+      "D": 0.215,
+      "L": 0.645
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Jordan|Argentina": {
+    "date": "Jun 27",
+    "model": {
+      "W": 0.0732,
+      "D": 0.1305,
+      "L": 0.7963
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.065,
+      "D": 0.11499999999999999,
+      "L": 0.825
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Algeria|Austria": {
+    "date": "Jun 27",
+    "model": {
+      "W": 0.3064,
+      "D": 0.2461,
+      "L": 0.4475
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.245,
+      "D": 0.305,
+      "L": 0.445
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Portugal|DR Congo": {
+    "date": "Jun 17",
+    "model": {
+      "W": 0.6692,
+      "D": 0.1884,
+      "L": 0.1424
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.765,
+      "D": 0.165,
+      "L": 0.07500000000000001
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Uzbekistan|Colombia": {
+    "date": "Jun 17",
+    "model": {
+      "W": 0.1808,
+      "D": 0.2097,
+      "L": 0.6094
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.095,
+      "D": 0.195,
+      "L": 0.715
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Portugal|Uzbekistan": {
+    "date": "Jun 23",
+    "model": {
+      "W": 0.6653,
+      "D": 0.1899,
+      "L": 0.1448
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.795,
+      "D": 0.135,
+      "L": 0.065
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Colombia|DR Congo": {
+    "date": "Jun 23",
+    "model": {
+      "W": 0.6135,
+      "D": 0.2084,
+      "L": 0.1781
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.675,
+      "D": 0.215,
+      "L": 0.11499999999999999
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Colombia|Portugal": {
+    "date": "Jun 27",
+    "model": {
+      "W": 0.3211,
+      "D": 0.2478,
+      "L": 0.4311
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.28500000000000003,
+      "D": 0.275,
+      "L": 0.475
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "DR Congo|Uzbekistan": {
+    "date": "Jun 27",
+    "model": {
+      "W": 0.3708,
+      "D": 0.2505,
+      "L": 0.3787
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.415,
+      "D": 0.28500000000000003,
+      "L": 0.305
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "England|Croatia": {
+    "date": "Jun 17",
+    "model": {
+      "W": 0.4932,
+      "D": 0.2393,
+      "L": 0.2675
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.565,
+      "D": 0.255,
+      "L": 0.195
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Ghana|Panama": {
+    "date": "Jun 17",
+    "model": {
+      "W": 0.3552,
+      "D": 0.2501,
+      "L": 0.3946
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.445,
+      "D": 0.275,
+      "L": 0.28500000000000003
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "England|Ghana": {
+    "date": "Jun 23",
+    "model": {
+      "W": 0.6997,
+      "D": 0.176,
+      "L": 0.1243
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.745,
+      "D": 0.165,
+      "L": 0.10500000000000001
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Panama|Croatia": {
+    "date": "Jun 23",
+    "model": {
+      "W": 0.2126,
+      "D": 0.2232,
+      "L": 0.5642
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.135,
+      "D": 0.235,
+      "L": 0.625
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Panama|England": {
+    "date": "Jun 27",
+    "model": {
+      "W": 0.1354,
+      "D": 0.1838,
+      "L": 0.6808
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.095,
+      "D": 0.14500000000000002,
+      "L": 0.765
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  },
+  "Croatia|Ghana": {
+    "date": "Jun 27",
+    "model": {
+      "W": 0.5849,
+      "D": 0.2173,
+      "L": 0.1978
+    },
+    "modelTs": "2026-06-12T05:16:07.285Z",
+    "market": {
+      "W": 0.595,
+      "D": 0.235,
+      "L": 0.165
+    },
+    "marketTs": "2026-06-12T05:16:07.285Z",
+    "frozen": false,
+    "result": null
+  }
+}
