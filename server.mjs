@@ -225,6 +225,43 @@ async function syncResults(codeMap, results) {
   return changed;
 }
 
+/* ---------- ingest ESPN scores into the model ----------
+   Final (ft) matches are persisted to results.json as the authoritative real
+   score (overwriting any Kalshi placeholder). Live/half-time matches are NOT
+   persisted — their current score is merged in-memory only so the model odds
+   reflect the match as it stands, recomputed every refresh tick. */
+function syncEspnFinals(scores, results) {
+  let changed = false;
+  for (const [key, s] of Object.entries(scores || {})) {
+    if (s.status !== "ft") continue;
+    if (!E.fixtures.some(f => f.key === key)) continue;
+    const cur = results.group[key];
+    if (cur && cur[0] === s.ga && cur[1] === s.gb) continue;
+    results.group[key] = [s.ga, s.gb];
+    changed = true;
+    console.log(`  ESPN final ${key} -> ${s.ga}-${s.gb}${cur ? " (corrected)" : ""}`);
+  }
+  if (changed) {
+    fs.mkdirSync(path.dirname(RESULTS_FILE), { recursive: true });
+    fs.writeFileSync(RESULTS_FILE, JSON.stringify(results, null, 2));
+  }
+  return changed;
+}
+
+// Non-mutating: results.json + current in-play scores, for the model only.
+function withLiveScores(results, scores) {
+  const group = { ...results.group };
+  const live = [];
+  for (const [key, s] of Object.entries(scores || {})) {
+    if (s.status !== "live" && s.status !== "ht") continue;
+    if (group[key]) continue; // a locked/final result always wins
+    if (!E.fixtures.some(f => f.key === key)) continue;
+    group[key] = [s.ga, s.gb]; // provisional — "if the match ended now"
+    live.push(key);
+  }
+  return { group, ko: results.ko || [], live };
+}
+
 /* ---------- server state & refresh loop ---------- */
 let state = {
   market:   null,
@@ -288,7 +325,10 @@ function updatePredlog() {
       changed = true;
     }
     if (!e.frozen && started) { e.frozen = true; changed = true; }
-    if (e.frozen && result && !e.result) { e.result = result; changed = true; }
+    // attach the result once known, and correct it if the final score is revised
+    if (e.frozen && result && (!e.result || e.result[0] !== result[0] || e.result[1] !== result[1])) {
+      e.result = result; changed = true;
+    }
   }
   if (changed) {
     savePredlog(log);
@@ -353,9 +393,7 @@ function refresh() {
 }
 async function doRefreshCycle() {
   try {
-    const results = loadResults();
-    const resultsChanged = JSON.stringify(results) !== JSON.stringify(state.results);
-    state.results = results;
+    let results = loadResults();
 
     if (!state.codeMap) {
       console.log("Building Kalshi code map…");
@@ -364,14 +402,18 @@ async function doRefreshCycle() {
 
     // Sync newly settled markets (fills in winner, placeholder score)
     const synced = await syncResults(state.codeMap, results);
-    if (synced) { state.results = loadResults(); }
+    if (synced) results = loadResults();
 
     const [scores, market] = await Promise.all([
       fetchScores().catch(e => { console.error("Scores error:", e.message); return state.scores; }),
       fetchMarket(state.codeMap).catch(e => { console.error("Market error:", e.message); return state.market; }),
     ]);
 
-    const scoresChanged = JSON.stringify(scores) !== JSON.stringify(state.scores);
+    // Persist real ESPN final scores (overwrites any placeholder), then reload
+    const finalsChanged = syncEspnFinals(scores, results);
+    if (finalsChanged) results = loadResults();
+
+    state.results = results; // finals only — what the predlog/scorecard freeze against
     state.scores  = scores;
     state.market  = market;
     state.ts      = new Date().toISOString();
@@ -381,12 +423,17 @@ async function doRefreshCycle() {
 
     try { updatePredlog(); } catch (e) { console.error("Predlog error:", e.message); }
 
+    // Model input = finals + current in-play scores, so odds update live
+    const modelResults = withLiveScores(results, scores);
+    const modelChanged = JSON.stringify(modelResults) !== JSON.stringify(state.modelResults);
+    state.modelResults = modelResults;
+
     broadcast({ ts: state.ts, scores: state.scores, market: state.market, scorecard: state.scorecard });
 
-    if (resultsChanged || synced || !state.analysis) await scheduleAnalysis(state.results);
+    if (modelChanged || finalsChanged || synced || !state.analysis) await scheduleAnalysis(modelResults);
 
     const liveCount = Object.values(scores).filter(s => s.status === "live" || s.status === "ht").length;
-    console.log(`[${new Date().toLocaleTimeString()}] refresh — ${Object.keys(scores).length} fixtures, ${liveCount} live, ${Object.keys(market?.matches || {}).length} market lines`);
+    console.log(`[${new Date().toLocaleTimeString()}] refresh — ${Object.keys(scores).length} fixtures, ${liveCount} live${modelResults.live.length ? " ("+modelResults.live.join(", ")+" in model)" : ""}, ${Object.keys(market?.matches || {}).length} market lines`);
   } catch (e) {
     console.error("Refresh error:", e.message);
   }
@@ -471,8 +518,7 @@ app.get("/sse", (req, res) => {
 console.log("WC26 live server starting…");
 console.log(`  Loading model from index.html… ${E.teams.length} teams, ${E.fixtures.length} fixtures`);
 
-await refresh();             // initial data load
-scheduleAnalysis(state.results); // kick off first model run
+await refresh();             // initial data load (also kicks off the first model run)
 scheduleRefresh();           // start polling loop
 
 app.listen(PORT, HOST, () => {

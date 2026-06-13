@@ -1,5 +1,5 @@
 {
- "ts": "2026-06-13T02:47:31.144Z",
+ "ts": "2026-06-13T03:21:10.058Z",
  "matches": {
   "DR Congo|Uzbekistan": {
    "L": 0.305,
@@ -12,9 +12,9 @@
    "L": 0.11499999999999999
   },
   "Türkiye|United States": {
-   "L": 0.395,
+   "L": 0.405,
    "W": 0.355,
-   "D": 0.265
+   "D": 0.255
   },
   "Japan|Sweden": {
    "D": 0.265,
@@ -49,7 +49,7 @@
   "Türkiye|Paraguay": {
    "W": 0.485,
    "D": 0.295,
-   "L": 0.245
+   "L": 0.225
   },
   "Switzerland|Bosnia and Herzegovina": {
    "D": 0.235,
@@ -98,7 +98,7 @@
   },
   "Colombia|Portugal": {
    "D": 0.275,
-   "L": 0.46499999999999997,
+   "L": 0.475,
    "W": 0.275
   },
   "Egypt|Iran": {
@@ -149,7 +149,7 @@
   "Ecuador|Germany": {
    "D": 0.245,
    "L": 0.555,
-   "W": 0.2
+   "W": 0.195
   },
   "South Africa|South Korea": {
    "D": 0.225,
@@ -233,11 +233,11 @@
   },
   "Brazil|Haiti": {
    "D": 0.065,
-   "L": 0.035,
+   "L": 0.045,
    "W": 0.905
   },
   "Germany|Ivory Coast": {
-   "D": 0.215,
+   "D": 0.20500000000000002,
    "W": 0.635,
    "L": 0.165
   },
@@ -247,9 +247,9 @@
    "L": 0.495
   },
   "United States|Australia": {
-   "W": 0.635,
+   "W": 0.645,
    "D": 0.225,
-   "L": 0.165
+   "L": 0.155
   },
   "Mexico|South Korea": {
    "D": 0.28500000000000003,
@@ -289,7 +289,7 @@
   "France|Senegal": {
    "D": 0.215,
    "L": 0.125,
-   "W": 0.665
+   "W": 0.675
   },
   "Iran|New Zealand": {
    "D": 0.275,
@@ -327,7 +327,7 @@
    "L": 0.255
   },
   "Haiti|Scotland": {
-   "D": 0.215,
+   "D": 0.225,
    "L": 0.625,
    "W": 0.165
   },
@@ -337,14 +337,9 @@
    "W": 0.065
   },
   "Brazil|Morocco": {
-   "D": 0.245,
+   "D": 0.255,
    "L": 0.175,
    "W": 0.585
-  },
-  "United States|Paraguay": {
-   "W": 0.985,
-   "D": 0.015,
-   "L": 0.005
   }
  },
  "groups": {
@@ -426,25 +421,25 @@
   "Senegal": 0.006500000000000001,
   "Sweden": 0.0025,
   "Norway": 0.0235,
-  "Mexico": 0.019,
-  "Morocco": 0.0135,
+  "Mexico": 0.0185,
+  "Morocco": 0.015,
   "Japan": 0.0165,
   "Ecuador": 0.0085,
-  "Colombia": 0.0175,
+  "Colombia": 0.0165,
   "Switzerland": 0.0095,
   "Canada": 0.0015,
-  "Austria": 0.0025,
+  "Austria": 0.0035,
   "Uruguay": 0.0095,
-  "United States": 0.028999999999999998,
+  "United States": 0.0345,
   "Portugal": 0.1085,
   "Netherlands": 0.058499999999999996,
   "Croatia": 0.0075,
   "England": 0.1075,
-  "Germany": 0.0535,
-  "Brazil": 0.08549999999999999,
-  "Belgium": 0.0225,
+  "Germany": 0.0515,
+  "Brazil": 0.08499999999999999,
+  "Belgium": 0.0215,
   "Argentina": 0.0885,
   "France": 0.17149999999999999,
-  "Spain": 0.168
+  "Spain": 0.169
  }
 }
