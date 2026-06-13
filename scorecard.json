@@ -1,5 +1,5 @@
 {
- "ts": "2026-06-12T05:16:07.285Z",
+ "ts": "2026-06-13T02:47:32.647Z",
  "rows": [
   {
    "key": "Mexico|South Africa",
@@ -38,14 +38,56 @@
    "brierModel": 0.5784,
    "brierMarket": 0.5964,
    "closer": "model"
+  },
+  {
+   "key": "Canada|Bosnia and Herzegovina",
+   "date": "Jun 12",
+   "model": {
+    "W": 0.5608,
+    "D": 0.2241,
+    "L": 0.2151
+   },
+   "market": {
+    "W": 0.535,
+    "D": 0.265,
+    "L": 0.215
+   },
+   "result": [
+    1,
+    1
+   ],
+   "brierModel": 0.9628,
+   "brierMarket": 0.8687,
+   "closer": "market"
+  },
+  {
+   "key": "United States|Paraguay",
+   "date": "Jun 12",
+   "model": {
+    "W": 0.5066,
+    "D": 0.2368,
+    "L": 0.2567
+   },
+   "market": {
+    "W": 0.485,
+    "D": 0.295,
+    "L": 0.235
+   },
+   "result": [
+    3,
+    1
+   ],
+   "brierModel": 0.3654,
+   "brierMarket": 0.4107,
+   "closer": "model"
   }
  ],
  "summary": {
-  "scored": 2,
-  "compared": 1,
-  "modelCloser": 1,
-  "marketCloser": 0,
-  "avgBrierModel": 0.5784,
-  "avgBrierMarket": 0.5964
+  "scored": 4,
+  "compared": 3,
+  "modelCloser": 2,
+  "marketCloser": 1,
+  "avgBrierModel": 0.6355,
+  "avgBrierMarket": 0.6253
  }
 }
